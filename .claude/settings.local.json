@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(yarn install)",
+      "Bash(ls:*)",
+      "Bash(npm start)",
+      "Bash(npx expo start:*)",
+      "Bash(yarn expo start)",
+      "Bash(npx expo@latest start:*)",
+      "Bash(rm:*)",
+      "Bash(npm install:*)",
+      "Bash(node_modules/.bin/expo start:*)",
+      "Bash(find:*)",
+      "Bash(npx:*)",
+      "Bash(expo start)",
+      "Bash(npm uninstall:*)",
+      "Bash(test:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(yarn add:*)",
+      "Bash(cat:*)",
+      "Bash(npm run web:*)",
+      "WebFetch(domain:crastonic.com)",
+      "WebFetch(domain:app.shuftipro.com)",
+      "WebFetch(domain:developers.shuftipro.com)",
+      "Bash(pod install:*)",
+      "Bash(grep:*)",
+      "Bash(node:*)",
+      "Bash(chmod:*)"
+    ],
+    "deny": []
+  }
+}

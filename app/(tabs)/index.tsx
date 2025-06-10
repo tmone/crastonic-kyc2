@@ -1,12 +1,19 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
+  const colorScheme = useColorScheme();
+  
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -16,15 +23,15 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+      <ThemedView style={[styles.titleContainer, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
+        <ThemedText type="title">{t('welcome')}</ThemedText>
         <HelloWave />
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
+      <ThemedView style={[styles.stepContainer, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
+        <ThemedText type="subtitle">{t('step1Title')}</ThemedText>
         <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
+          {t('step1Text')}
+          {' '}
           <ThemedText type="defaultSemiBold">
             {Platform.select({
               ios: 'cmd + d',
@@ -35,25 +42,23 @@ export default function HomeScreen() {
           to open developer tools.
         </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
+      <ThemedView style={[styles.stepContainer, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
+        <ThemedText type="subtitle">{t('step2Title')}</ThemedText>
         <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
+          {t('step2Text')}
         </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
+      <ThemedView style={[styles.stepContainer, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
+        <ThemedText type="subtitle">{t('step3Title')}</ThemedText>
         <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
+          {t('step3Text')}
         </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
   );
 }
+
+const { width: deviceWidth } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   titleContainer: {
@@ -66,10 +71,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   reactLogo: {
-    height: 178,
-    width: 199,
-    bottom: 0,
-    left: 0,
+    width: deviceWidth,
+    height: 150,
+    contentFit: 'cover' as const,
     position: 'absolute',
+    left: 0,
+    bottom: 0,
   },
 });
