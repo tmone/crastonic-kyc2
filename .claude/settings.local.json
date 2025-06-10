@@ -26,7 +26,12 @@
       "Bash(pod install:*)",
       "Bash(grep:*)",
       "Bash(node:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(yarn start)",
+      "Bash(yarn install:*)",
+      "Bash(ANDROID_SDK_ROOT=/mnt/c/Users/dev/AppData/Local/Android/Sdk npx expo start)",
+      "Bash(yarn)",
+      "Bash(./gradlew:*)"
     ],
     "deny": []
   }
