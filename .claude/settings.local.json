@@ -31,7 +31,13 @@
       "Bash(yarn install:*)",
       "Bash(ANDROID_SDK_ROOT=/mnt/c/Users/dev/AppData/Local/Android/Sdk npx expo start)",
       "Bash(yarn)",
-      "Bash(./gradlew:*)"
+      "Bash(./gradlew:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(java:*)",
+      "Bash(sudo apt:*)",
+      "Bash(sudo apt install:*)",
+      "Bash(export:*)"
     ],
     "deny": []
   }

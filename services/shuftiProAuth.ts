@@ -1,6 +1,5 @@
 // ShuftiPro Authentication Service
 import { Platform } from 'react-native';
-import { SHUFTIPRO_CLIENT_ID, SHUFTIPRO_SECRET_KEY } from '@env';
 
 interface ShuftiProCredentials {
   clientId: string;
@@ -12,16 +11,11 @@ interface AccessTokenResponse {
   message: string;
 }
 
-// Load credentials from environment variables
+// ShuftiPro credentials - use hardcoded values for stable operation
 const SHUFTIPRO_CREDENTIALS: ShuftiProCredentials = {
-  clientId: SHUFTIPRO_CLIENT_ID || '',
-  secretKey: SHUFTIPRO_SECRET_KEY || ''
+  clientId: '21178caf22354d71b7e9f32ca8bfcd07d1d4846298af39366977ef9b595ff890',
+  secretKey: 'PW2VftETSNAtLrwdjomnWJyfjpzLGvTl'
 };
-
-// Validate credentials on load
-if (!SHUFTIPRO_CLIENT_ID || !SHUFTIPRO_SECRET_KEY) {
-  console.warn('ShuftiPro credentials not found in environment variables');
-}
 
 export class ShuftiProAuthService {
   private static accessToken: string | null = null;

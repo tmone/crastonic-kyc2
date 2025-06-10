@@ -137,7 +137,6 @@ const styles = StyleSheet.create({
   reactLogo: {
     width: deviceWidth,
     height: 150,
-    contentFit: 'cover' as const,
     position: 'absolute',
     left: 0,
     bottom: 0,
@@ -186,7 +185,6 @@ const styles = StyleSheet.create({
   chevron: {
     fontSize: 12,
     opacity: 0.6,
-    transition: 'transform 0.2s',
   },
   chevronUp: {
     transform: [{ rotate: '180deg' }],

@@ -315,7 +315,6 @@ const styles = StyleSheet.create({
   reactLogo: {
     width: deviceWidth,
     height: 150,
-    contentFit: 'cover' as const,
     position: 'absolute',
     left: 0,
     bottom: 0,

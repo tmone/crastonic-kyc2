@@ -149,7 +149,6 @@ export function KYCWebView({ visible, onClose, onSuccess, onError, verificationU
           allowsInlineMediaPlayback={true}
           mediaPlaybackRequiresUserAction={false}
           // Android specific props
-          androidHardwareAccelerationDisabled={Platform.OS === 'android' ? false : undefined}
           androidLayerType="hardware"
           originWhitelist={['*']}
           scalesPageToFit={false}
@@ -161,10 +160,6 @@ export function KYCWebView({ visible, onClose, onSuccess, onError, verificationU
           allowFileAccessFromFileURLs={true}
           allowUniversalAccessFromFileURLs={true}
           // Fix for Android camera/file upload
-          onPermissionRequest={(request) => {
-            console.log('Permission requested:', request);
-            request.grant();
-          }}
           // Enable file upload on Android
           allowsProtectedMedia={true}
           // User agent for better compatibility
