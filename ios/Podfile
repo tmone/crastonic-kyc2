@@ -43,7 +43,8 @@ target 'crastonickyc' do
   )
 
   # ShuftiPro SDK for KYC verification
-  pod 'shuftipro-onsite-mobilesdk'
+  # Using the SDK from node_modules now, this direct pod reference is no longer needed
+  # pod 'shuftipro-onsite-mobilesdk'
 
   post_install do |installer|
     react_native_post_install(

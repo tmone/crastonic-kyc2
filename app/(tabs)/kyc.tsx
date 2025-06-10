@@ -195,22 +195,38 @@ export default function KYCScreen() {
             style={styles.reactLogo}
           />
         }>
-        <ThemedView style={[styles.container, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
-          <ThemedText type="title">{t('kycTitle')}</ThemedText>
-          
-          <ThemedView style={[styles.contentContainer, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
-            <ThemedText style={styles.description}>
+        <ThemedView style={[
+          styles.container,
+          colorScheme === 'dark' && { backgroundColor: 'transparent' },
+          Platform.OS === 'ios' && { paddingTop: 10 } // iOS-specific padding
+        ]}>
+          <ThemedText type="title" style={Platform.OS === 'ios' ? styles.iosTitle : {}}>{t('kycTitle')}</ThemedText>
+
+          <ThemedView style={[
+            styles.contentContainer,
+            colorScheme === 'dark' && { backgroundColor: 'transparent' },
+            Platform.OS === 'ios' && styles.iosContentContainer
+          ]}>
+            <ThemedText style={[styles.description, Platform.OS === 'ios' && styles.iosText]}>
               {t('kycDescription')}
             </ThemedText>
-            
-            <ThemedView style={[styles.statusContainer, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
-              <ThemedText style={styles.statusText}>
+
+            <ThemedView style={[
+              styles.statusContainer,
+              colorScheme === 'dark' && { backgroundColor: 'transparent' },
+              Platform.OS === 'ios' && styles.iosStatusContainer
+            ]}>
+              <ThemedText style={[styles.statusText, Platform.OS === 'ios' && styles.iosText]}>
                 {getStatusMessage()}
               </ThemedText>
             </ThemedView>
 
             <TouchableOpacity
-              style={[styles.verifyButton, { backgroundColor: getButtonColor() }]}
+              style={[
+                styles.verifyButton,
+                { backgroundColor: getButtonColor() },
+                Platform.OS === 'ios' && styles.iosButton
+              ]}
               onPress={startVerification}
               disabled={verificationStatus === 'loading'}
             >
@@ -223,16 +239,26 @@ export default function KYCScreen() {
               )}
             </TouchableOpacity>
 
-            <ThemedView style={[styles.infoContainer, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
-              <ThemedText style={styles.infoTitle}>{t('kycRequirements')}</ThemedText>
-              <ThemedText style={styles.infoText}>• {t('kycRequirement1')}</ThemedText>
-              <ThemedText style={styles.infoText}>• {t('kycRequirement2')}</ThemedText>
-              <ThemedText style={styles.infoText}>• {t('kycRequirement3')}</ThemedText>
+            <ThemedView style={[
+              styles.infoContainer,
+              colorScheme === 'dark' && { backgroundColor: 'transparent' },
+              Platform.OS === 'ios' && styles.iosInfoContainer
+            ]}>
+              <ThemedText style={[styles.infoTitle, Platform.OS === 'ios' && styles.iosTitle]}>
+                {t('kycRequirements')}
+              </ThemedText>
+              <ThemedText style={[styles.infoText, Platform.OS === 'ios' && styles.iosText]}>• {t('kycRequirement1')}</ThemedText>
+              <ThemedText style={[styles.infoText, Platform.OS === 'ios' && styles.iosText]}>• {t('kycRequirement2')}</ThemedText>
+              <ThemedText style={[styles.infoText, Platform.OS === 'ios' && styles.iosText]}>• {t('kycRequirement3')}</ThemedText>
             </ThemedView>
-            
+
             {!isSDKAvailable && Platform.OS !== 'web' && (
-              <ThemedView style={[styles.warningContainer, colorScheme === 'dark' && { backgroundColor: 'rgba(255, 165, 0, 0.1)' }]}>
-                <ThemedText style={styles.warningText}>
+              <ThemedView style={[
+                styles.warningContainer,
+                colorScheme === 'dark' && { backgroundColor: 'rgba(255, 165, 0, 0.1)' },
+                Platform.OS === 'ios' && styles.iosWarningContainer
+              ]}>
+                <ThemedText style={[styles.warningText, Platform.OS === 'ios' && styles.iosText]}>
                   ⚠️ ShuftiPro SDK requires a custom development build. Using WebView mode.
                 </ThemedText>
               </ThemedView>
@@ -240,7 +266,7 @@ export default function KYCScreen() {
           </ThemedView>
         </ThemedView>
       </ParallaxScrollView>
-      
+
       <KYCWebView
         visible={showWebView}
         onClose={handleWebViewClose}
@@ -330,5 +356,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     color: '#ff9500',
+  },
+  // iOS specific styles
+  iosContentContainer: {
+    paddingHorizontal: 16, // iOS typically has less padding
+  },
+  iosStatusContainer: {
+    marginBottom: 24,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: 'rgba(170, 170, 170, 0.1)', // Subtle background for iOS
+  },
+  iosButton: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+    marginBottom: 30,
+  },
+  iosInfoContainer: {
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(170, 170, 170, 0.1)', // Subtle background for iOS
+  },
+  iosWarningContainer: {
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 165, 0, 0.08)', // More subtle on iOS
+  },
+  iosTitle: {
+    fontWeight: '600', // iOS uses different font weights
+    letterSpacing: -0.5, // iOS typography typically has tighter letter spacing
+  },
+  iosText: {
+    letterSpacing: -0.3,
+    lineHeight: 22, // iOS typically has slightly different line heights
   },
 });

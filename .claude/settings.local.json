@@ -26,7 +26,19 @@
       "Bash(pod install:*)",
       "Bash(grep:*)",
       "Bash(node:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(chmod:*)",
+      "Bash(./scripts/setup-ios.sh:*)",
+      "Bash(npx expo run:ios:*)",
+      "Bash(open ios/crastonickyc.xcworkspace)",
+      "Bash(xcrun simctl list:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(rm:*)",
+      "Bash(pod install:*)",
+      "Bash(open /Users/tmone/crastonic-kyc2/ios/crastonickyc.xcworkspace)",
+      "Bash(npx react-native:*)",
+      "Bash(npx expo start:*)",
+      "Bash(xcrun simctl boot:*)"
     ],
     "deny": []
   }
