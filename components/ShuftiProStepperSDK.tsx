@@ -51,6 +51,11 @@ export function ShuftiProStepperSDK({
   // Get theme and language from context
   const { actualTheme } = useTheme();
   const { t, language } = useLanguage();
+
+  // Log the current language when component mounts
+  useEffect(() => {
+    console.log('ShuftiProStepperSDK - Current language:', language);
+  }, [language]);
   
   // Define theme colors
   const backgroundColor = actualTheme === 'dark' ? '#111115' : '#FFFFFF';
@@ -100,7 +105,7 @@ export function ShuftiProStepperSDK({
           setCurrentStep('processing');
           startVerification();
         } else {
-          Alert.alert('Invalid Email', 'Please enter a valid email address.');
+          Alert.alert(t('invalidEmailTitle'), t('invalidEmailMessage'));
         }
         break;
       case 'processing':
@@ -139,27 +144,41 @@ export function ShuftiProStepperSDK({
     setEmailValid(validateEmail(text));
   };
 
-  // Map language code to ShuftiPro format
+  /**
+   * Maps language code from app format to ShuftiPro format
+   *
+   * ShuftiPro uses ISO language codes in uppercase format.
+   * This function maps from our app's language codes to ShuftiPro's expected format.
+   *
+   * @param lang - The language code from the app (e.g., 'en', 'vi', 'ja')
+   * @returns The mapped language code for ShuftiPro (e.g., 'EN', 'VI', 'JA')
+   */
   const getShuftiProLanguage = (lang: string): string => {
+    // ShuftiPro supported languages with their codes
     const languageMap: { [key: string]: string } = {
-      'en': 'EN',
-      'ja': 'JA',
-      'zh': 'ZH',
-      'ko': 'KO',
-      'ar': 'AR',
-      'es': 'ES',
-      'fr': 'FR',
-      'de': 'DE',
-      'it': 'IT',
-      'pt': 'PT',
-      'ru': 'RU',
-      'tr': 'TR',
-      'vi': 'VI',
-      'th': 'TH',
-      'id': 'ID',
-      'ms': 'MS',
+      'en': 'EN', // English
+      'ja': 'JA', // Japanese
+      'zh': 'ZH', // Chinese
+      'ko': 'KO', // Korean
+      'ar': 'AR', // Arabic
+      'es': 'ES', // Spanish
+      'fr': 'FR', // French
+      'de': 'DE', // German
+      'it': 'IT', // Italian
+      'pt': 'PT', // Portuguese
+      'ru': 'RU', // Russian
+      'tr': 'TR', // Turkish
+      'vi': 'VI', // Vietnamese
+      'th': 'TH', // Thai
+      'id': 'ID', // Indonesian
+      'ms': 'MS', // Malay
+      // Add more languages as needed
     };
-    return languageMap[lang] || 'EN';
+
+    // Default to English if language not found
+    const mappedLang = languageMap[lang.toLowerCase()] || 'EN';
+    console.log(`Mapping language: ${lang} → ${mappedLang}`);
+    return mappedLang;
   };
   
   // Start verification process with ShuftiPro SDK - simplified to use journey directly
@@ -178,11 +197,17 @@ export function ShuftiProStepperSDK({
         throw new Error('ShuftiPro credentials not found');
       }
 
-      // Create a simple verification object with just what's needed
+      // Get the mapped language for ShuftiPro
+      const shuftiLang = getShuftiProLanguage(language);
+
+      // Create a verification object with complete language settings
       const verificationObject = {
         reference, // Use the reference generated at component mount
         email: email, // Include the user's email
-        journey_id: journeyId // Include the journey ID
+        journey_id: journeyId, // Include the journey ID
+        language: shuftiLang, // Include language preference in ISO format (VI, EN, etc)
+        country_code: language.toUpperCase(), // Some versions use country code for language
+        locale: language.toLowerCase() // Some versions use locale in lowercase (vi, en, etc)
       };
 
       // Use basic auth with client ID and secret key
@@ -192,11 +217,15 @@ export function ShuftiProStepperSDK({
         secret_key: credentials.secretKey
       };
 
-      // Minimal SDK configuration with essential parameters
+      // SDK configuration with comprehensive language settings
       const configObject = {
         async: false, // Use synchronous mode
         dark_mode: actualTheme === 'dark' ? 1 : 0,
-        language: getShuftiProLanguage(language),
+        // Language settings in all possible formats
+        language: shuftiLang, // ISO format (VI, EN, etc)
+        locale: language.toLowerCase(), // Lowercase (vi, en, etc)
+        country: language.toUpperCase(), // Some SDKs use country code
+        locale_code: language.toLowerCase(), // Some SDKs use locale_code
         // For iOS and Android, the following ensures UI is displayed correctly
         ...(Platform.OS === 'ios' ? {
           show_consent: 1,
@@ -210,9 +239,13 @@ export function ShuftiProStepperSDK({
       };
 
       console.log('Starting verification with ShuftiPro SDK');
+      console.log('Current app language:', language);
       console.log('Verification payload:', JSON.stringify(verificationObject));
       console.log('Auth object:', JSON.stringify(authObject));
       console.log('Config object:', JSON.stringify(configObject));
+
+      // Log all language information for debugging
+      console.log(`Language mapping: ${language} → ${verificationObject.language}`);
 
       // Create timeout to prevent hanging
       const timeoutId = setTimeout(() => {
@@ -428,20 +461,20 @@ export function ShuftiProStepperSDK({
   const renderEmailVerificationStep = () => (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.stepContent}>
-        <ThemedText style={styles.stepTitle}>Email Verification</ThemedText>
+        <ThemedText style={styles.stepTitle}>{t('kycTitle')}</ThemedText>
         <ThemedText style={styles.stepDescription}>
-          Please enter your email address to continue with the verification process:
+          {t('kycDescription')}
         </ThemedText>
 
         <View style={[styles.inputContainer, { backgroundColor: cardBgColor }]}>
-          <ThemedText style={styles.inputLabel}>Email Address</ThemedText>
+          <ThemedText style={styles.inputLabel}>{t('emailLabel')}</ThemedText>
           <View style={[
             styles.textInputContainer,
             { borderColor: emailValid ? '#4CAF50' : email.length > 0 ? '#FF5252' : actualTheme === 'dark' ? '#555' : '#DDD' }
           ]}>
             <TextInput
               style={[styles.textInput, { color: textColor }]}
-              placeholder="Enter your email"
+              placeholder={t('emailPlaceholder')}
               placeholderTextColor={actualTheme === 'dark' ? '#888' : '#AAA'}
               value={email}
               onChangeText={handleEmailChange}
@@ -461,11 +494,11 @@ export function ShuftiProStepperSDK({
           </View>
           {email.length > 0 && !emailValid && (
             <ThemedText style={styles.errorText}>
-              Please enter a valid email address
+              {t('emailInvalid')}
             </ThemedText>
           )}
           <ThemedText style={styles.inputHelp}>
-            Your email will be used to send you verification results and for account recovery purposes.
+            {t('emailHelp')}
           </ThemedText>
         </View>
       </View>
@@ -482,14 +515,14 @@ export function ShuftiProStepperSDK({
           onPress={goToNextStep}
           disabled={!emailValid}
         >
-          <ThemedText style={styles.buttonText}>Continue</ThemedText>
+          <ThemedText style={styles.buttonText}>{t('continueButton')}</ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.secondaryButton, { borderColor: textColor }]}
           onPress={goToPreviousStep}
         >
-          <ThemedText style={[styles.secondaryButtonText, { color: textColor }]}>Back</ThemedText>
+          <ThemedText style={[styles.secondaryButtonText, { color: textColor }]}>{t('backButton')}</ThemedText>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -499,9 +532,9 @@ export function ShuftiProStepperSDK({
   const renderProcessingStep = () => (
     <View style={styles.processingContainer}>
       <ActivityIndicator size="large" color={primaryColor} />
-      <ThemedText style={styles.processingTitle}>Processing Verification</ThemedText>
+      <ThemedText style={styles.processingTitle}>{t('processingTitle')}</ThemedText>
       <ThemedText style={styles.processingDescription}>
-        Please wait while we verify your identity. This may take a moment.
+        {t('processingDescription')}
       </ThemedText>
     </View>
   );
@@ -512,16 +545,16 @@ export function ShuftiProStepperSDK({
       <View style={[styles.resultIconContainer, { backgroundColor: primaryColor }]}>
         <ThemedText style={styles.resultIcon}>✓</ThemedText>
       </View>
-      <ThemedText style={styles.resultTitle}>Verification Complete</ThemedText>
+      <ThemedText style={styles.resultTitle}>{t('resultTitle')}</ThemedText>
       <ThemedText style={styles.resultDescription}>
-        Thank you for completing the verification process.
+        {t('resultDescription')}
       </ThemedText>
       
       <TouchableOpacity 
         style={[styles.button, { backgroundColor: primaryColor, marginTop: 30 }]}
         onPress={onCancel}
       >
-        <ThemedText style={styles.buttonText}>Done</ThemedText>
+        <ThemedText style={styles.buttonText}>{t('doneButton')}</ThemedText>
       </TouchableOpacity>
     </View>
   );
@@ -549,19 +582,19 @@ export function ShuftiProStepperSDK({
           style={styles.closeButton}
           onPress={() => {
             Alert.alert(
-              'Cancel Verification',
-              'Are you sure you want to cancel the verification process?',
+              t('cancelVerificationTitle'),
+              t('cancelVerificationMessage'),
               [
-                { text: 'No', style: 'cancel' },
-                { text: 'Yes', onPress: onCancel }
+                { text: t('noButton'), style: 'cancel' },
+                { text: t('yesButton'), onPress: onCancel }
               ]
             );
           }}
         >
-          <ThemedText style={styles.closeButtonText}>Cancel</ThemedText>
+          <ThemedText style={styles.closeButtonText}>{t('cancelButton')}</ThemedText>
         </TouchableOpacity>
 
-        <ThemedText style={styles.headerTitle}>Identity Verification</ThemedText>
+        <ThemedText style={styles.headerTitle}>{t('kycTitle')}</ThemedText>
 
         <View style={styles.closeButton} />
       </View>

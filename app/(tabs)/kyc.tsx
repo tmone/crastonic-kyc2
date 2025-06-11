@@ -185,26 +185,26 @@ export default function KYCScreen() {
           if (result.status === 'verified' || result.event === 'verification.accepted' || result.event === 'verification.approved') {
             Alert.alert(
               t('kycCompleted'),
-              'Your verification has been completed successfully.',
-              [{ text: 'OK' }]
+              t('kycCompleted'),
+              [{ text: t('okButton') }]
             );
           } else if (result.status === 'pending' || result.event === 'request.received') {
             Alert.alert(
-              'Verification In Progress',
-              result.message || 'Your verification is being processed. You will be notified once it is complete.',
-              [{ text: 'OK' }]
+              t('kycPendingTitle'),
+              result.message || t('kycPendingMessage'),
+              [{ text: t('okButton') }]
             );
           } else if (result.status === 'declined' || result.event === 'verification.declined') {
             Alert.alert(
-              'Verification Declined',
-              'Your verification was declined. Please try again.',
-              [{ text: 'OK' }]
+              t('kycFailed'),
+              t('kycFailed'),
+              [{ text: t('okButton') }]
             );
           } else if (result.status === 'error' || result.event === 'error') {
             Alert.alert(
-              'Error',
-              'An error occurred during verification. Please try again.',
-              [{ text: 'OK' }]
+              t('verificationErrorTitle'),
+              t('kycFailed'),
+              [{ text: t('okButton') }]
             );
           }
         }, 300);
@@ -234,9 +234,9 @@ export default function KYCScreen() {
       const cameraPermission = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.CAMERA,
         {
-          title: "Camera Permission",
-          message: "We need camera access for verification",
-          buttonPositive: "OK"
+          title: t('cameraPermissionTitle'),
+          message: t('cameraPermissionMessage'),
+          buttonPositive: t('okButton')
         }
       );
 
@@ -246,18 +246,18 @@ export default function KYCScreen() {
         storagePermission = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
           {
-            title: "Media Permission",
-            message: "We need access to your photos for verification",
-            buttonPositive: "OK"
+            title: t('mediaPermissionTitle'),
+            message: t('mediaPermissionMessage'),
+            buttonPositive: t('okButton')
           }
         );
       } else {
         storagePermission = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           {
-            title: "Storage Permission",
-            message: "We need access to your storage for verification",
-            buttonPositive: "OK"
+            title: t('storagePermissionTitle'),
+            message: t('storagePermissionMessage'),
+            buttonPositive: t('okButton')
           }
         );
       }
@@ -304,15 +304,15 @@ export default function KYCScreen() {
     // ask if the user wants to start a new verification
     if (verificationStatus === 'completed' && verifiedEmail) {
       Alert.alert(
-        'Pending Verification',
-        `Email ${verifiedEmail} is waiting for approval. Do you want to start a new verification with a different email?`,
+        t('kycPendingTitle'),
+        t('kycPendingVerification').replace('{email}', verifiedEmail || ''),
         [
           {
-            text: 'Cancel',
+            text: t('cancelButton'),
             style: 'cancel'
           },
           {
-            text: 'Start New',
+            text: t('kycStartNewVerification'),
             onPress: async () => {
               // Reset verification state
               await resetVerification();
@@ -338,9 +338,9 @@ export default function KYCScreen() {
       const hasPermissions = await requestPermissions();
       if (!hasPermissions) {
         Alert.alert(
-          'Permissions Required',
-          'Camera and storage permissions are required for identity verification.',
-          [{ text: 'OK' }]
+          t('permissionsRequiredTitle'),
+          t('permissionsRequiredMessage'),
+          [{ text: t('okButton') }]
         );
         setVerificationStatus('idle');
         return;
@@ -366,9 +366,10 @@ export default function KYCScreen() {
       case 'in_progress':
         return t('kycInProgress');
       case 'completed':
-        // If we have a verified email, show it in the status message
+        // If we have a verified email, show it in the status message with translation
         if (verifiedEmail) {
-          return `Email ${verifiedEmail} is waiting for approval. Click here to start a new verification.`;
+          // Replace {email} placeholder with the actual email
+          return t('kycPendingVerification').replace('{email}', verifiedEmail);
         }
         return t('kycCompleted');
       case 'failed':
@@ -388,9 +389,9 @@ export default function KYCScreen() {
       case 'in_progress':
         return t('kycContinue');
       case 'completed':
-        // If we have a verified email, show different button text
+        // If we have a verified email, show different button text with translation
         if (verifiedEmail) {
-          return 'Start New Verification';
+          return t('kycStartNewVerification');
         }
         return t('kycViewDetails');
       default:
@@ -442,16 +443,16 @@ export default function KYCScreen() {
 
         // Show error with retry option
         Alert.alert(
-          'Verification Error',
-          `${errorMessage} Would you like to try again?`,
+          t('verificationErrorTitle'),
+          `${errorMessage} ${t('kycFailed')}`,
           [
             {
-              text: 'No',
+              text: t('noButton'),
               style: 'cancel',
               onPress: () => setVerificationStatus('idle')
             },
             {
-              text: 'Try Again',
+              text: t('tryAgainButton'),
               onPress: () => {
                 // Reset and try again with sufficient delay to ensure UI is ready
                 setVerificationStatus('idle');
