@@ -28,6 +28,8 @@ export interface VerificationResult {
   verification_data?: any;
   event?: string;
   error?: any;
+  message?: string; // Added for pending status messages
+  email?: string;   // Added to track the email used for verification
 }
 
 // Define verification request
