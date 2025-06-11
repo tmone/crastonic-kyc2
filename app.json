@@ -51,6 +51,11 @@
     "prebuildCommand": "./scripts/setup-ios.sh",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "dce18393-27da-409e-b2ff-feecacf3ea39"
+      }
     }
   }
 }
