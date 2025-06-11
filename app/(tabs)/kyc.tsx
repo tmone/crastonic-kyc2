@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, Dimensions, View, TouchableOpacity, Platform, Alert, Modal, PermissionsAndroid } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -10,21 +11,85 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
-import { ShuftiProSDKIntegration } from '@/components/ShuftiProSDKIntegration';
-import { ShuftiProSafeSDK } from '@/components/ShuftiProSafeSDK';
-import { ShuftiProWebView } from '@/components/ShuftiProWebView';
+import { ShuftiProStepperSDK } from '@/components/ShuftiProStepperSDK';
 import { VerificationResult } from '@/services/shuftiProDirectApi';
 
 const { width: deviceWidth } = Dimensions.get('window');
+
+// Storage keys and version
+const STORAGE_KEYS = {
+  VERIFIED_EMAIL: 'kycVerifiedEmail',
+  VERIFICATION_REFERENCE: 'kycVerificationReference',
+  VERIFICATION_STATUS: 'kycVerificationStatus',
+  STORAGE_VERSION: 'kycStorageVersion',
+};
+
+// Current storage version - increment this if the storage format changes
+const CURRENT_STORAGE_VERSION = '1.0';
 
 export default function KYCScreen() {
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'loading' | 'in_progress' | 'completed' | 'failed'>('idle');
-  const [verificationUrl] = useState('https://app.shuftipro.com/verification/process/4mjladGERNsawA4sEMzAF26OlLu94Cm4uXRCDrtMynHhMDTMClD7caaEmoc7fKI6');
-  const [showWebView, setShowWebView] = useState(false);
-  const [showNativeVerification, setShowNativeVerification] = useState(false);
+  const [journeyUrl] = useState('fgecdahM1749419683'); // The journey ID for ShuftiPro verification
+  const [showVerification, setShowVerification] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
+  const [verificationReference, setVerificationReference] = useState<string | null>(null);
+
+  // Load saved verification data on mount
+  useEffect(() => {
+    const loadSavedData = async () => {
+      try {
+        // Check storage version first
+        const storageVersion = await AsyncStorage.getItem(STORAGE_KEYS.STORAGE_VERSION);
+
+        // If version doesn't match or is missing, we'll clear existing data
+        if (storageVersion !== CURRENT_STORAGE_VERSION) {
+          console.log(`Storage version mismatch (found: ${storageVersion}, current: ${CURRENT_STORAGE_VERSION}) - resetting data`);
+          // We can't call resetVerification here because it's not defined yet,
+          // so we'll clear the items directly
+          await AsyncStorage.multiRemove([
+            STORAGE_KEYS.VERIFIED_EMAIL,
+            STORAGE_KEYS.VERIFICATION_REFERENCE,
+            STORAGE_KEYS.VERIFICATION_STATUS
+          ]);
+          await AsyncStorage.setItem(STORAGE_KEYS.STORAGE_VERSION, CURRENT_STORAGE_VERSION);
+          return;
+        }
+
+        // Load verification data
+        const savedEmail = await AsyncStorage.getItem(STORAGE_KEYS.VERIFIED_EMAIL);
+        const savedReference = await AsyncStorage.getItem(STORAGE_KEYS.VERIFICATION_REFERENCE);
+        const savedStatus = await AsyncStorage.getItem(STORAGE_KEYS.VERIFICATION_STATUS);
+
+        console.log('Loading saved verification data...');
+
+        if (savedEmail) {
+          console.log(`Found saved email: ${savedEmail}`);
+          setVerifiedEmail(savedEmail);
+        } else {
+          console.log('No saved email found');
+        }
+
+        if (savedReference) {
+          console.log(`Found saved reference: ${savedReference}`);
+          setVerificationReference(savedReference);
+        }
+
+        if (savedStatus && (savedStatus === 'completed' || savedStatus === 'failed')) {
+          console.log(`Found saved status: ${savedStatus}`);
+          setVerificationStatus(savedStatus as 'completed' | 'failed');
+        }
+
+        console.log('Loaded saved verification data:', { savedEmail, savedStatus, savedReference });
+      } catch (error) {
+        console.error('Error loading saved verification data:', error);
+      }
+    };
+
+    loadSavedData();
+  }, []);
 
   // Initialize with platform detection and set SDK timeout handler
   useEffect(() => {
@@ -49,10 +114,9 @@ export default function KYCScreen() {
       if (verificationStatus === 'in_progress' || verificationStatus === 'loading') {
         console.warn('KYC verification took too long - resetting status');
         setVerificationStatus('failed');
-        setShowNativeVerification(false);
-        setShowWebView(false);
+        setShowVerification(false);
       }
-    }, 120000); // 2-minute global timeout as a last resort
+    }, 300000); // 5-minute global timeout to allow more time for verification
 
     // Cleanup function
     return () => {
@@ -71,35 +135,93 @@ export default function KYCScreen() {
   const handleVerificationComplete = (result: VerificationResult) => {
     console.log('Verification completed:', result);
 
-    if (result.status === 'verified' || result.event === 'verification.accepted' || result.event === 'verification.approved') {
-      setVerificationStatus('completed');
-      Alert.alert(
-        t('kycCompleted'),
-        'Your verification has been completed successfully.',
-        [{ text: 'OK' }]
-      );
-    } else if (result.status === 'declined' || result.event === 'verification.declined') {
-      setVerificationStatus('failed');
-      Alert.alert(
-        'Verification Declined',
-        'Your verification was declined. Please try again.',
-        [{ text: 'OK' }]
-      );
-    } else if (result.status === 'error' || result.event === 'error') {
-      setVerificationStatus('failed');
-      Alert.alert(
-        'Error',
-        'An error occurred during verification. Please try again.',
-        [{ text: 'OK' }]
-      );
-    }
+    // Ensure we're on the main thread when updating UI
+    setTimeout(async () => {
+      // Extract email from result if available
+      const email = result.email;
+      const reference = result.reference;
+      let status = '';
 
-    setShowNativeVerification(false);
+      // First set the verification status
+      if (result.status === 'verified' || result.event === 'verification.accepted' || result.event === 'verification.approved') {
+        setVerificationStatus('completed');
+        status = 'completed';
+      } else if (result.status === 'pending' || result.event === 'request.received') {
+        setVerificationStatus('completed'); // Mark as completed even if pending approval
+        status = 'completed';
+
+        // Save the email and reference if verification is pending
+        if (email) {
+          setVerifiedEmail(email);
+          await AsyncStorage.setItem(STORAGE_KEYS.VERIFIED_EMAIL, email);
+        }
+
+        if (reference) {
+          setVerificationReference(reference);
+          await AsyncStorage.setItem(STORAGE_KEYS.VERIFICATION_REFERENCE, reference);
+        }
+
+        // Save the verification status
+        await AsyncStorage.setItem(STORAGE_KEYS.VERIFICATION_STATUS, status);
+
+        // Ensure storage version is set
+        await AsyncStorage.setItem(STORAGE_KEYS.STORAGE_VERSION, CURRENT_STORAGE_VERSION);
+
+        console.log(`Email ${email} saved to storage as pending verification`);
+      } else if (result.status === 'declined' || result.event === 'verification.declined') {
+        setVerificationStatus('failed');
+        status = 'failed';
+      } else if (result.status === 'error' || result.event === 'error') {
+        setVerificationStatus('failed');
+        status = 'failed';
+      }
+
+      // Close the verification modal with a delay to ensure proper UI transition
+      setTimeout(() => {
+        setShowVerification(false);
+
+        // Show the appropriate alert based on verification result
+        setTimeout(() => {
+          if (result.status === 'verified' || result.event === 'verification.accepted' || result.event === 'verification.approved') {
+            Alert.alert(
+              t('kycCompleted'),
+              t('kycCompleted'),
+              [{ text: t('okButton') }]
+            );
+          } else if (result.status === 'pending' || result.event === 'request.received') {
+            Alert.alert(
+              t('kycPendingTitle'),
+              result.message || t('kycPendingMessage'),
+              [{ text: t('okButton') }]
+            );
+          } else if (result.status === 'declined' || result.event === 'verification.declined') {
+            Alert.alert(
+              t('kycFailed'),
+              t('kycFailed'),
+              [{ text: t('okButton') }]
+            );
+          } else if (result.status === 'error' || result.event === 'error') {
+            Alert.alert(
+              t('verificationErrorTitle'),
+              t('kycFailed'),
+              [{ text: t('okButton') }]
+            );
+          }
+        }, 300);
+      }, 300);
+    }, 0);
   };
 
   const handleVerificationCancel = () => {
-    setShowNativeVerification(false);
-    setVerificationStatus('idle');
+    // Ensure we're on the main thread when updating UI
+    setTimeout(() => {
+      setVerificationStatus('idle');
+
+      // Close the verification modal with a delay to ensure proper UI transition
+      setTimeout(() => {
+        setShowVerification(false);
+      }, 300);
+    }, 0);
   };
 
   const requestPermissions = async (): Promise<boolean> => {
@@ -112,9 +234,9 @@ export default function KYCScreen() {
       const cameraPermission = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.CAMERA,
         {
-          title: "Camera Permission",
-          message: "We need camera access for verification",
-          buttonPositive: "OK"
+          title: t('cameraPermissionTitle'),
+          message: t('cameraPermissionMessage'),
+          buttonPositive: t('okButton')
         }
       );
 
@@ -124,18 +246,18 @@ export default function KYCScreen() {
         storagePermission = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
           {
-            title: "Media Permission",
-            message: "We need access to your photos for verification",
-            buttonPositive: "OK"
+            title: t('mediaPermissionTitle'),
+            message: t('mediaPermissionMessage'),
+            buttonPositive: t('okButton')
           }
         );
       } else {
         storagePermission = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           {
-            title: "Storage Permission",
-            message: "We need access to your storage for verification",
-            buttonPositive: "OK"
+            title: t('storagePermissionTitle'),
+            message: t('storagePermissionMessage'),
+            buttonPositive: t('okButton')
           }
         );
       }
@@ -151,7 +273,64 @@ export default function KYCScreen() {
     }
   };
 
+  // Function to reset verification state
+  const resetVerification = async () => {
+    try {
+      console.log('Resetting verification state...');
+
+      // Clear verification data from storage
+      await AsyncStorage.multiRemove([
+        STORAGE_KEYS.VERIFIED_EMAIL,
+        STORAGE_KEYS.VERIFICATION_REFERENCE,
+        STORAGE_KEYS.VERIFICATION_STATUS
+      ]);
+
+      // Set the storage version
+      await AsyncStorage.setItem(STORAGE_KEYS.STORAGE_VERSION, CURRENT_STORAGE_VERSION);
+
+      // Reset state
+      setVerifiedEmail(null);
+      setVerificationReference(null);
+      setVerificationStatus('idle');
+
+      console.log('Verification state reset complete');
+    } catch (error) {
+      console.error('Error resetting verification state:', error);
+    }
+  };
+
   const startVerification = async () => {
+    // If verification is already completed and we have a verified email,
+    // ask if the user wants to start a new verification
+    if (verificationStatus === 'completed' && verifiedEmail) {
+      Alert.alert(
+        t('kycPendingTitle'),
+        t('kycPendingVerification').replace('{email}', verifiedEmail || ''),
+        [
+          {
+            text: t('cancelButton'),
+            style: 'cancel'
+          },
+          {
+            text: t('kycStartNewVerification'),
+            onPress: async () => {
+              // Reset verification state
+              await resetVerification();
+              // Start a new verification
+              initiateVerification();
+            }
+          }
+        ]
+      );
+      return;
+    }
+
+    // Otherwise, start verification normally
+    initiateVerification();
+  };
+
+  // Helper function to actually start the verification process
+  const initiateVerification = async () => {
     setVerificationStatus('loading');
 
     // Request permissions if needed
@@ -159,9 +338,9 @@ export default function KYCScreen() {
       const hasPermissions = await requestPermissions();
       if (!hasPermissions) {
         Alert.alert(
-          'Permissions Required',
-          'Camera and storage permissions are required for identity verification.',
-          [{ text: 'OK' }]
+          t('permissionsRequiredTitle'),
+          t('permissionsRequiredMessage'),
+          [{ text: t('okButton') }]
         );
         setVerificationStatus('idle');
         return;
@@ -172,17 +351,11 @@ export default function KYCScreen() {
     setTimeout(() => {
       setVerificationStatus('in_progress');
 
-      // Always use native SDK for verification
-      setShowNativeVerification(true);
+      // Show the journey-based verification
+      setShowVerification(true);
     }, 1000);
   };
 
-  const handleWebViewClose = () => {
-    setShowWebView(false);
-    if (verificationStatus === 'in_progress') {
-      setVerificationStatus('idle');
-    }
-  };
 
   const getStatusMessage = () => {
     switch (verificationStatus) {
@@ -193,6 +366,11 @@ export default function KYCScreen() {
       case 'in_progress':
         return t('kycInProgress');
       case 'completed':
+        // If we have a verified email, show it in the status message with translation
+        if (verifiedEmail) {
+          // Pass email as a parameter to the translation function
+          return t('kycPendingVerification', { email: verifiedEmail });
+        }
         return t('kycCompleted');
       case 'failed':
         return t('kycFailed');
@@ -211,6 +389,10 @@ export default function KYCScreen() {
       case 'in_progress':
         return t('kycContinue');
       case 'completed':
+        // If we have a verified email, show different button text with translation
+        if (verifiedEmail) {
+          return t('kycStartNewVerification');
+        }
         return t('kycViewDetails');
       default:
         return t('kycStartButton');
@@ -222,48 +404,65 @@ export default function KYCScreen() {
       case 'failed':
         return errorColor;
       case 'completed':
+        // If we have a verified email (pending approval), show primary color
+        if (verifiedEmail) {
+          return primaryButtonColor;
+        }
         return successColor;
       default:
         return primaryButtonColor;
     }
   };
 
-  // Handle fallback to WebView if needed
+  // Handle verification errors with enhanced error handling
   const handleVerificationError = (error: any) => {
     console.error('Verification error:', error);
 
-    // Mark verification as failed
-    setVerificationStatus('failed');
-    setShowNativeVerification(false);
+    // Ensure we're on the main thread when updating UI
+    setTimeout(() => {
+      // Mark verification as failed
+      setVerificationStatus('failed');
 
-    // Show error without WebView fallback option
-    if (!showWebView) {
-      Alert.alert(
-        'Verification Error',
-        'There was an error with the verification process. Would you like to try again?',
-        [
-          {
-            text: 'No',
-            style: 'cancel',
-            onPress: () => setVerificationStatus('idle')
-          },
-          {
-            text: 'Try Again',
-            onPress: () => {
-              // Reset and try again with SDK
-              setVerificationStatus('idle');
-              setTimeout(() => startVerification(), 500);
-            }
+      // Close the verification modal with a delay to ensure proper UI transition
+      setTimeout(() => {
+        setShowVerification(false);
+
+        // Determine the error message based on the error type
+        let errorMessage = 'There was an error with the verification process.';
+
+        if (error && error.error) {
+          if (typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.error.message) {
+            errorMessage = error.error.message;
           }
-        ]
-      );
-    } else {
-      Alert.alert(
-        'Verification Error',
-        'There was an error with the verification process. Please try again later.',
-        [{ text: 'OK' }]
-      );
-    }
+        } else if (error && error.verification_result && error.verification_result.error) {
+          errorMessage = error.verification_result.error.message ||
+                        'Verification was not successful. Please check your information and try again.';
+        }
+
+        // Show error with retry option
+        Alert.alert(
+          t('verificationErrorTitle'),
+          `${errorMessage} ${t('kycFailed')}`,
+          [
+            {
+              text: t('noButton'),
+              style: 'cancel',
+              onPress: () => setVerificationStatus('idle')
+            },
+            {
+              text: t('tryAgainButton'),
+              onPress: () => {
+                // Reset and try again with sufficient delay to ensure UI is ready
+                setVerificationStatus('idle');
+                setTimeout(() => startVerification(), 1000);
+              }
+            }
+          ]
+        );
+      }, 300);
+    }, 0);
   };
 
   return (
@@ -338,37 +537,20 @@ export default function KYCScreen() {
         </ThemedView>
       </ParallaxScrollView>
 
-      {/* Native Verification Modal */}
+      {/* KYC Verification Modal */}
       <Modal
-        visible={showNativeVerification}
+        visible={showVerification}
         animationType="slide"
         transparent={false}
         onRequestClose={handleVerificationCancel}
       >
-        <ShuftiProSafeSDK
+        <ShuftiProStepperSDK
           onComplete={handleVerificationComplete}
           onCancel={handleVerificationCancel}
           onError={handleVerificationError}
-          verificationUrl={verificationUrl}
+          journeyId={journeyUrl}
         />
       </Modal>
-
-      {/* WebView Fallback (only used if native verification fails) */}
-      <ShuftiProWebView
-        visible={showWebView}
-        onClose={handleWebViewClose}
-        onSuccess={(data) => handleVerificationComplete({
-          status: 'verified',
-          event: 'verification.accepted',
-          verification_result: data
-        })}
-        onError={(error) => handleVerificationComplete({
-          status: 'error',
-          error,
-          event: 'error'
-        })}
-        verificationUrl={verificationUrl}
-      />
     </>
   );
 }
