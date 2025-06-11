@@ -368,8 +368,8 @@ export default function KYCScreen() {
       case 'completed':
         // If we have a verified email, show it in the status message with translation
         if (verifiedEmail) {
-          // Replace {email} placeholder with the actual email
-          return t('kycPendingVerification').replace('{email}', verifiedEmail);
+          // Pass email as a parameter to the translation function
+          return t('kycPendingVerification', { email: verifiedEmail });
         }
         return t('kycCompleted');
       case 'failed':
