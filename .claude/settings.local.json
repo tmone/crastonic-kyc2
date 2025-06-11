@@ -38,7 +38,25 @@
       "Bash(open /Users/tmone/crastonic-kyc2/ios/crastonickyc.xcworkspace)",
       "Bash(npx react-native:*)",
       "Bash(npx expo start:*)",
-      "Bash(xcrun simctl boot:*)"
+      "Bash(xcrun simctl boot:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(npx expo prebuild:*)",
+      "Bash(npm install:*)",
+      "Bash(ls:*)",
+      "Bash(kill:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(npm run ios:*)",
+      "Bash(echo $SHELL)",
+      "Bash(java:*)",
+      "Bash(brew install:*)",
+      "Bash($ANDROID_HOME/emulator/emulator:*)",
+      "Bash(~/Library/Android/sdk/platform-tools/adb devices)",
+      "Bash(EXPO_NO_INTERACTIVE=1 npx expo start --android)",
+      "Bash(mkdir:*)",
+      "Bash(adb logcat:*)",
+      "Bash(~/Library/Android/sdk/platform-tools/adb logcat -d)",
+      "Bash(./gradlew:*)"
     ],
     "deny": []
   }

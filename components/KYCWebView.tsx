@@ -197,15 +197,15 @@ export function KYCWebView({ visible, onClose, onSuccess, onError, verificationU
           allowsLinkPreview={Platform.OS === 'ios'}
 
           // Platform specific settings
-          mediaPlaybackRequiresUserAction={Platform.OS === 'ios' ? false : undefined}
-          allowsFullscreenVideo={Platform.OS === 'ios' ? true : undefined}
-          applicationNameForUserAgent={Platform.OS === 'ios' ? 'CrastonicKYC' : undefined}
+          mediaPlaybackRequiresUserAction={false}
+          allowsFullscreenVideo={true}
+          applicationNameForUserAgent={'CrastonicKYC'}
 
           // Android specific props
-          mixedContentMode={Platform.OS === 'android' ? 'compatibility' : undefined}
+          mixedContentMode={Platform.OS === 'android' ? 'always' : undefined}
           androidHardwareAccelerationDisabled={Platform.OS === 'android' ? false : undefined}
           androidLayerType={Platform.OS === 'android' ? 'hardware' : undefined}
-          scalesPageToFit={Platform.OS === 'android' ? false : undefined}
+          scalesPageToFit={Platform.OS === 'android' ? true : undefined}
           setSupportMultipleWindows={Platform.OS === 'android' ? false : undefined}
           overScrollMode={Platform.OS === 'android' ? 'never' : undefined}
           saveFormDataDisabled={Platform.OS === 'android' ? true : undefined}
@@ -214,12 +214,16 @@ export function KYCWebView({ visible, onClose, onSuccess, onError, verificationU
           allowFileAccessFromFileURLs={Platform.OS === 'android' ? true : undefined}
           allowUniversalAccessFromFileURLs={Platform.OS === 'android' ? true : undefined}
           allowsProtectedMedia={Platform.OS === 'android' ? true : undefined}
+          useWebView2={Platform.OS === 'android' ? true : undefined}
+          cacheEnabled={true}
+          setBuiltInZoomControls={Platform.OS === 'android' ? false : undefined}
+          setDisplayZoomControls={Platform.OS === 'android' ? false : undefined}
 
-          // Permission handling for Android
-          onPermissionRequest={Platform.OS === 'android' ? (request) => {
+          // Permission handling for both platforms
+          onPermissionRequest={(request) => {
             console.log('Permission requested:', request);
             request.grant();
-          } : undefined}
+          }}
 
           // User agent for platform-specific compatibility
           userAgent={Platform.OS === 'android'

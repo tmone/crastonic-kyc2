@@ -15,6 +15,8 @@ import com.facebook.soloader.SoLoader
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
+// Use our custom ShuftiPro package instead
+import com.crastonic.kyc.shufti.ShuftiProPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -23,8 +25,8 @@ class MainApplication : Application(), ReactApplication {
         object : DefaultReactNativeHost(this) {
           override fun getPackages(): List<ReactPackage> {
             val packages = PackageList(this).packages
-            // Packages that cannot be autolinked yet can be added manually here, for example:
-            // packages.add(MyReactNativePackage())
+            // Use our custom ShuftiPro package
+            packages.add(ShuftiProPackage())
             return packages
           }
 
@@ -47,6 +49,16 @@ class MainApplication : Application(), ReactApplication {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       load()
     }
+
+    // Initialize our custom ShuftiPro module
+    try {
+      // Create our package
+      val shuftiproPackage = ShuftiProPackage()
+      android.util.Log.d("MainApplication", "Custom ShuftiPro module initialized successfully")
+    } catch (e: Exception) {
+      android.util.Log.e("MainApplication", "Error initializing ShuftiPro module: ${e.message}")
+    }
+
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
   }
 

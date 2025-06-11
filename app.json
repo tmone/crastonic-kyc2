@@ -10,7 +10,17 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.crastonic.kyc"
+      "bundleIdentifier": "com.crastonic.kyc",
+      "buildConfiguration": {
+        "developmentClient": false,
+        "distribution": "internal"
+      },
+      "infoPlist": {
+        "EXDisableDevMenu": true,
+        "EXNoDevClient": true,
+        "UIBackgroundModes": ["location", "fetch"],
+        "NSAllowsArbitraryLoads": true
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -36,8 +46,9 @@
           "backgroundColor": "#ffffff"
         }
       ],
-       "./plugins/withShuftiPro"
+      "./plugins/withShuftiPro"
     ],
+    "prebuildCommand": "./scripts/setup-ios.sh",
     "experiments": {
       "typedRoutes": true
     }

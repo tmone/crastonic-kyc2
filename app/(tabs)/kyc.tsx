@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { StyleSheet, Dimensions, View, TouchableOpacity, ActivityIndicator, Platform, Alert } from 'react-native';
+import { StyleSheet, Dimensions, View, TouchableOpacity, Platform, Alert, Modal, PermissionsAndroid } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
 
@@ -9,8 +9,11 @@ import { ThemedView } from '@/components/ThemedView';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { useShuftiProSDK } from '@/components/ShuftiProSDK';
-import { KYCWebView } from '@/components/KYCWebView';
+import { LoadingIndicator } from '@/components/LoadingIndicator';
+import { ShuftiProSDKIntegration } from '@/components/ShuftiProSDKIntegration';
+import { ShuftiProSafeSDK } from '@/components/ShuftiProSafeSDK';
+import { ShuftiProWebView } from '@/components/ShuftiProWebView';
+import { VerificationResult } from '@/services/shuftiProDirectApi';
 
 const { width: deviceWidth } = Dimensions.get('window');
 
@@ -21,117 +24,157 @@ export default function KYCScreen() {
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'loading' | 'in_progress' | 'completed' | 'failed'>('idle');
   const [verificationUrl] = useState('https://app.shuftipro.com/verification/process/4mjladGERNsawA4sEMzAF26OlLu94Cm4uXRCDrtMynHhMDTMClD7caaEmoc7fKI6');
   const [showWebView, setShowWebView] = useState(false);
-  const { startVerificationWithJourney, startVerificationWithAuth, isSDKAvailable } = useShuftiProSDK();
-  const [useSDK, setUseSDK] = useState(isSDKAvailable); // Use SDK only if available
-  
+  const [showNativeVerification, setShowNativeVerification] = useState(false);
+
+  // Initialize with platform detection and set SDK timeout handler
+  useEffect(() => {
+    console.log(`Platform detected: ${Platform.OS}`);
+
+    // Set a global error handler for unhandled promises
+    const errorHandler = (error: any) => {
+      console.warn('Unhandled error in KYC screen:', error);
+      if (verificationStatus === 'in_progress') {
+        setVerificationStatus('failed');
+      }
+    };
+
+    // Add event listeners for global errors
+    if (Platform.OS === 'web') {
+      window.addEventListener('error', errorHandler);
+      window.addEventListener('unhandledrejection', errorHandler);
+    }
+
+    // Set a safety timeout to reset verification if stuck
+    const safetyTimeout = setTimeout(() => {
+      if (verificationStatus === 'in_progress' || verificationStatus === 'loading') {
+        console.warn('KYC verification took too long - resetting status');
+        setVerificationStatus('failed');
+        setShowNativeVerification(false);
+        setShowWebView(false);
+      }
+    }, 120000); // 2-minute global timeout as a last resort
+
+    // Cleanup function
+    return () => {
+      if (Platform.OS === 'web') {
+        window.removeEventListener('error', errorHandler);
+        window.removeEventListener('unhandledrejection', errorHandler);
+      }
+      clearTimeout(safetyTimeout);
+    };
+  }, [verificationStatus]);
+
   const primaryButtonColor = colorScheme === 'dark' ? '#0a7ea4' : '#0a7ea4'; // Use consistent blue color
   const errorColor = '#FF4444';
   const successColor = '#44BB44';
 
-  const handleSDKResult = (result: any) => {
-    console.log('SDK Result:', result);
-    
-    switch (result.event) {
-      case 'verification.accepted':
-      case 'verification.approved':
-        setVerificationStatus('completed');
-        Alert.alert(
-          t('kycCompleted'),
-          'Your verification has been completed successfully.',
-          [{ text: 'OK' }]
+  const handleVerificationComplete = (result: VerificationResult) => {
+    console.log('Verification completed:', result);
+
+    if (result.status === 'verified' || result.event === 'verification.accepted' || result.event === 'verification.approved') {
+      setVerificationStatus('completed');
+      Alert.alert(
+        t('kycCompleted'),
+        'Your verification has been completed successfully.',
+        [{ text: 'OK' }]
+      );
+    } else if (result.status === 'declined' || result.event === 'verification.declined') {
+      setVerificationStatus('failed');
+      Alert.alert(
+        'Verification Declined',
+        'Your verification was declined. Please try again.',
+        [{ text: 'OK' }]
+      );
+    } else if (result.status === 'error' || result.event === 'error') {
+      setVerificationStatus('failed');
+      Alert.alert(
+        'Error',
+        'An error occurred during verification. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
+
+    setShowNativeVerification(false);
+  };
+
+  const handleVerificationCancel = () => {
+    setShowNativeVerification(false);
+    setVerificationStatus('idle');
+  };
+
+  const requestPermissions = async (): Promise<boolean> => {
+    if (Platform.OS !== 'android') {
+      return true; // iOS handles permissions differently
+    }
+
+    try {
+      // Request camera permission
+      const cameraPermission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: "Camera Permission",
+          message: "We need camera access for verification",
+          buttonPositive: "OK"
+        }
+      );
+
+      // Request storage permission based on Android version
+      let storagePermission;
+      if (Platform.Version >= 33) {
+        storagePermission = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+          {
+            title: "Media Permission",
+            message: "We need access to your photos for verification",
+            buttonPositive: "OK"
+          }
         );
-        break;
-        
-      case 'verification.declined':
-        setVerificationStatus('failed');
-        Alert.alert(
-          'Verification Declined',
-          'Your verification was declined. Please try again.',
-          [{ text: 'OK' }]
+      } else {
+        storagePermission = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          {
+            title: "Storage Permission",
+            message: "We need access to your storage for verification",
+            buttonPositive: "OK"
+          }
         );
-        break;
-        
-      case 'verification.cancelled':
-        setVerificationStatus('idle');
-        break;
-        
-      case 'error':
-        setVerificationStatus('failed');
-        Alert.alert(
-          'Error',
-          'An error occurred during verification. Please try again.',
-          [{ text: 'OK' }]
-        );
-        break;
-        
-      case 'request.unauthorized':
-        setVerificationStatus('failed');
-        Alert.alert(
-          'Authorization Error',
-          'The verification link may have expired or is invalid. Please use WebView mode instead.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Use WebView', 
-              onPress: () => {
-                setUseSDK(false);
-                setVerificationStatus('in_progress');
-                setShowWebView(true);
-              }
-            }
-          ]
-        );
-        break;
-        
-      default:
-        console.log('Unknown event:', result.event);
+      }
+
+      return (
+        cameraPermission === PermissionsAndroid.RESULTS.GRANTED &&
+        (storagePermission === PermissionsAndroid.RESULTS.GRANTED ||
+         storagePermission === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN)
+      );
+    } catch (err) {
+      console.warn('Permission request error:', err);
+      return false;
     }
   };
 
   const startVerification = async () => {
     setVerificationStatus('loading');
-    
-    // Try SDK first
-    if (useSDK && Platform.OS !== 'web') {
-      try {
-        // Use credentials-based authentication instead of journey URL
-        await startVerificationWithAuth(handleSDKResult);
-      } catch (error) {
-        console.error('SDK Error:', error);
-        // Fallback to WebView
+
+    // Request permissions if needed
+    if (Platform.OS === 'android') {
+      const hasPermissions = await requestPermissions();
+      if (!hasPermissions) {
         Alert.alert(
-          'SDK Error',
-          'Failed to start SDK verification. Would you like to try WebView instead?',
-          [
-            { text: 'Cancel', style: 'cancel', onPress: () => setVerificationStatus('idle') },
-            { 
-              text: 'Use WebView', 
-              onPress: () => {
-                setUseSDK(false);
-                setVerificationStatus('in_progress');
-                setShowWebView(true);
-              }
-            },
-          ]
+          'Permissions Required',
+          'Camera and storage permissions are required for identity verification.',
+          [{ text: 'OK' }]
         );
+        setVerificationStatus('idle');
+        return;
       }
-    } else {
-      // Use WebView for web platform or as fallback
-      setVerificationStatus('in_progress');
-      setShowWebView(true);
     }
-  };
 
-  const handleVerificationSuccess = (data: any) => {
-    console.log('Verification successful:', data);
-    setVerificationStatus('completed');
-    setShowWebView(false);
-  };
+    // Small delay to show loading animation
+    setTimeout(() => {
+      setVerificationStatus('in_progress');
 
-  const handleVerificationError = (error: any) => {
-    console.log('Verification error:', error);
-    setVerificationStatus('failed');
-    setShowWebView(false);
+      // Always use native SDK for verification
+      setShowNativeVerification(true);
+    }, 1000);
   };
 
   const handleWebViewClose = () => {
@@ -184,7 +227,45 @@ export default function KYCScreen() {
         return primaryButtonColor;
     }
   };
-  
+
+  // Handle fallback to WebView if needed
+  const handleVerificationError = (error: any) => {
+    console.error('Verification error:', error);
+
+    // Mark verification as failed
+    setVerificationStatus('failed');
+    setShowNativeVerification(false);
+
+    // Show error without WebView fallback option
+    if (!showWebView) {
+      Alert.alert(
+        'Verification Error',
+        'There was an error with the verification process. Would you like to try again?',
+        [
+          {
+            text: 'No',
+            style: 'cancel',
+            onPress: () => setVerificationStatus('idle')
+          },
+          {
+            text: 'Try Again',
+            onPress: () => {
+              // Reset and try again with SDK
+              setVerificationStatus('idle');
+              setTimeout(() => startVerification(), 500);
+            }
+          }
+        ]
+      );
+    } else {
+      Alert.alert(
+        'Verification Error',
+        'There was an error with the verification process. Please try again later.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
   return (
     <>
       <ParallaxScrollView
@@ -225,19 +306,21 @@ export default function KYCScreen() {
               style={[
                 styles.verifyButton,
                 { backgroundColor: getButtonColor() },
-                Platform.OS === 'ios' && styles.iosButton
+                Platform.OS === 'ios' && styles.iosButton,
+                (verificationStatus === 'loading') && { opacity: 0.7 }
               ]}
               onPress={startVerification}
               disabled={verificationStatus === 'loading'}
             >
               {verificationStatus === 'loading' ? (
-                <ActivityIndicator color="white" />
+                <LoadingIndicator color="#FFFFFF" size={24} />
               ) : (
                 <ThemedText style={styles.verifyButtonText}>
                   {getButtonText()}
                 </ThemedText>
               )}
             </TouchableOpacity>
+
 
             <ThemedView style={[
               styles.infoContainer,
@@ -251,27 +334,39 @@ export default function KYCScreen() {
               <ThemedText style={[styles.infoText, Platform.OS === 'ios' && styles.iosText]}>• {t('kycRequirement2')}</ThemedText>
               <ThemedText style={[styles.infoText, Platform.OS === 'ios' && styles.iosText]}>• {t('kycRequirement3')}</ThemedText>
             </ThemedView>
-
-            {!isSDKAvailable && Platform.OS !== 'web' && (
-              <ThemedView style={[
-                styles.warningContainer,
-                colorScheme === 'dark' && { backgroundColor: 'rgba(255, 165, 0, 0.1)' },
-                Platform.OS === 'ios' && styles.iosWarningContainer
-              ]}>
-                <ThemedText style={[styles.warningText, Platform.OS === 'ios' && styles.iosText]}>
-                  ⚠️ ShuftiPro SDK requires a custom development build. Using WebView mode.
-                </ThemedText>
-              </ThemedView>
-            )}
           </ThemedView>
         </ThemedView>
       </ParallaxScrollView>
 
-      <KYCWebView
+      {/* Native Verification Modal */}
+      <Modal
+        visible={showNativeVerification}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={handleVerificationCancel}
+      >
+        <ShuftiProSafeSDK
+          onComplete={handleVerificationComplete}
+          onCancel={handleVerificationCancel}
+          onError={handleVerificationError}
+          verificationUrl={verificationUrl}
+        />
+      </Modal>
+
+      {/* WebView Fallback (only used if native verification fails) */}
+      <ShuftiProWebView
         visible={showWebView}
         onClose={handleWebViewClose}
-        onSuccess={handleVerificationSuccess}
-        onError={handleVerificationError}
+        onSuccess={(data) => handleVerificationComplete({
+          status: 'verified',
+          event: 'verification.accepted',
+          verification_result: data
+        })}
+        onError={(error) => handleVerificationComplete({
+          status: 'error',
+          error,
+          event: 'error'
+        })}
         verificationUrl={verificationUrl}
       />
     </>
