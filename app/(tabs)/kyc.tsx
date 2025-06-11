@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, Dimensions, View, TouchableOpacity, Platform, Alert, Modal, PermissionsAndroid } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -15,6 +16,17 @@ import { VerificationResult } from '@/services/shuftiProDirectApi';
 
 const { width: deviceWidth } = Dimensions.get('window');
 
+// Storage keys and version
+const STORAGE_KEYS = {
+  VERIFIED_EMAIL: 'kycVerifiedEmail',
+  VERIFICATION_REFERENCE: 'kycVerificationReference',
+  VERIFICATION_STATUS: 'kycVerificationStatus',
+  STORAGE_VERSION: 'kycStorageVersion',
+};
+
+// Current storage version - increment this if the storage format changes
+const CURRENT_STORAGE_VERSION = '1.0';
+
 export default function KYCScreen() {
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
@@ -22,6 +34,62 @@ export default function KYCScreen() {
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'loading' | 'in_progress' | 'completed' | 'failed'>('idle');
   const [journeyUrl] = useState('fgecdahM1749419683'); // The journey ID for ShuftiPro verification
   const [showVerification, setShowVerification] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
+  const [verificationReference, setVerificationReference] = useState<string | null>(null);
+
+  // Load saved verification data on mount
+  useEffect(() => {
+    const loadSavedData = async () => {
+      try {
+        // Check storage version first
+        const storageVersion = await AsyncStorage.getItem(STORAGE_KEYS.STORAGE_VERSION);
+
+        // If version doesn't match or is missing, we'll clear existing data
+        if (storageVersion !== CURRENT_STORAGE_VERSION) {
+          console.log(`Storage version mismatch (found: ${storageVersion}, current: ${CURRENT_STORAGE_VERSION}) - resetting data`);
+          // We can't call resetVerification here because it's not defined yet,
+          // so we'll clear the items directly
+          await AsyncStorage.multiRemove([
+            STORAGE_KEYS.VERIFIED_EMAIL,
+            STORAGE_KEYS.VERIFICATION_REFERENCE,
+            STORAGE_KEYS.VERIFICATION_STATUS
+          ]);
+          await AsyncStorage.setItem(STORAGE_KEYS.STORAGE_VERSION, CURRENT_STORAGE_VERSION);
+          return;
+        }
+
+        // Load verification data
+        const savedEmail = await AsyncStorage.getItem(STORAGE_KEYS.VERIFIED_EMAIL);
+        const savedReference = await AsyncStorage.getItem(STORAGE_KEYS.VERIFICATION_REFERENCE);
+        const savedStatus = await AsyncStorage.getItem(STORAGE_KEYS.VERIFICATION_STATUS);
+
+        console.log('Loading saved verification data...');
+
+        if (savedEmail) {
+          console.log(`Found saved email: ${savedEmail}`);
+          setVerifiedEmail(savedEmail);
+        } else {
+          console.log('No saved email found');
+        }
+
+        if (savedReference) {
+          console.log(`Found saved reference: ${savedReference}`);
+          setVerificationReference(savedReference);
+        }
+
+        if (savedStatus && (savedStatus === 'completed' || savedStatus === 'failed')) {
+          console.log(`Found saved status: ${savedStatus}`);
+          setVerificationStatus(savedStatus as 'completed' | 'failed');
+        }
+
+        console.log('Loaded saved verification data:', { savedEmail, savedStatus, savedReference });
+      } catch (error) {
+        console.error('Error loading saved verification data:', error);
+      }
+    };
+
+    loadSavedData();
+  }, []);
 
   // Initialize with platform detection and set SDK timeout handler
   useEffect(() => {
@@ -68,14 +136,44 @@ export default function KYCScreen() {
     console.log('Verification completed:', result);
 
     // Ensure we're on the main thread when updating UI
-    setTimeout(() => {
+    setTimeout(async () => {
+      // Extract email from result if available
+      const email = result.email;
+      const reference = result.reference;
+      let status = '';
+
       // First set the verification status
       if (result.status === 'verified' || result.event === 'verification.accepted' || result.event === 'verification.approved') {
         setVerificationStatus('completed');
+        status = 'completed';
+      } else if (result.status === 'pending' || result.event === 'request.received') {
+        setVerificationStatus('completed'); // Mark as completed even if pending approval
+        status = 'completed';
+
+        // Save the email and reference if verification is pending
+        if (email) {
+          setVerifiedEmail(email);
+          await AsyncStorage.setItem(STORAGE_KEYS.VERIFIED_EMAIL, email);
+        }
+
+        if (reference) {
+          setVerificationReference(reference);
+          await AsyncStorage.setItem(STORAGE_KEYS.VERIFICATION_REFERENCE, reference);
+        }
+
+        // Save the verification status
+        await AsyncStorage.setItem(STORAGE_KEYS.VERIFICATION_STATUS, status);
+
+        // Ensure storage version is set
+        await AsyncStorage.setItem(STORAGE_KEYS.STORAGE_VERSION, CURRENT_STORAGE_VERSION);
+
+        console.log(`Email ${email} saved to storage as pending verification`);
       } else if (result.status === 'declined' || result.event === 'verification.declined') {
         setVerificationStatus('failed');
+        status = 'failed';
       } else if (result.status === 'error' || result.event === 'error') {
         setVerificationStatus('failed');
+        status = 'failed';
       }
 
       // Close the verification modal with a delay to ensure proper UI transition
@@ -88,6 +186,12 @@ export default function KYCScreen() {
             Alert.alert(
               t('kycCompleted'),
               'Your verification has been completed successfully.',
+              [{ text: 'OK' }]
+            );
+          } else if (result.status === 'pending' || result.event === 'request.received') {
+            Alert.alert(
+              'Verification In Progress',
+              result.message || 'Your verification is being processed. You will be notified once it is complete.',
               [{ text: 'OK' }]
             );
           } else if (result.status === 'declined' || result.event === 'verification.declined') {
@@ -169,7 +273,64 @@ export default function KYCScreen() {
     }
   };
 
+  // Function to reset verification state
+  const resetVerification = async () => {
+    try {
+      console.log('Resetting verification state...');
+
+      // Clear verification data from storage
+      await AsyncStorage.multiRemove([
+        STORAGE_KEYS.VERIFIED_EMAIL,
+        STORAGE_KEYS.VERIFICATION_REFERENCE,
+        STORAGE_KEYS.VERIFICATION_STATUS
+      ]);
+
+      // Set the storage version
+      await AsyncStorage.setItem(STORAGE_KEYS.STORAGE_VERSION, CURRENT_STORAGE_VERSION);
+
+      // Reset state
+      setVerifiedEmail(null);
+      setVerificationReference(null);
+      setVerificationStatus('idle');
+
+      console.log('Verification state reset complete');
+    } catch (error) {
+      console.error('Error resetting verification state:', error);
+    }
+  };
+
   const startVerification = async () => {
+    // If verification is already completed and we have a verified email,
+    // ask if the user wants to start a new verification
+    if (verificationStatus === 'completed' && verifiedEmail) {
+      Alert.alert(
+        'Pending Verification',
+        `Email ${verifiedEmail} is waiting for approval. Do you want to start a new verification with a different email?`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel'
+          },
+          {
+            text: 'Start New',
+            onPress: async () => {
+              // Reset verification state
+              await resetVerification();
+              // Start a new verification
+              initiateVerification();
+            }
+          }
+        ]
+      );
+      return;
+    }
+
+    // Otherwise, start verification normally
+    initiateVerification();
+  };
+
+  // Helper function to actually start the verification process
+  const initiateVerification = async () => {
     setVerificationStatus('loading');
 
     // Request permissions if needed
@@ -205,6 +366,10 @@ export default function KYCScreen() {
       case 'in_progress':
         return t('kycInProgress');
       case 'completed':
+        // If we have a verified email, show it in the status message
+        if (verifiedEmail) {
+          return `Email ${verifiedEmail} is waiting for approval. Click here to start a new verification.`;
+        }
         return t('kycCompleted');
       case 'failed':
         return t('kycFailed');
@@ -223,6 +388,10 @@ export default function KYCScreen() {
       case 'in_progress':
         return t('kycContinue');
       case 'completed':
+        // If we have a verified email, show different button text
+        if (verifiedEmail) {
+          return 'Start New Verification';
+        }
         return t('kycViewDetails');
       default:
         return t('kycStartButton');
@@ -234,6 +403,10 @@ export default function KYCScreen() {
       case 'failed':
         return errorColor;
       case 'completed':
+        // If we have a verified email (pending approval), show primary color
+        if (verifiedEmail) {
+          return primaryButtonColor;
+        }
         return successColor;
       default:
         return primaryButtonColor;
