@@ -28,6 +28,9 @@ export default function TabLayout() {
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',
+            backgroundColor: colorScheme === 'dark' ? 'rgba(17, 17, 21, 0.88)' : undefined,
+            height: 88,
+            borderTopWidth: 0,
           },
           default: {},
         }),

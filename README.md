@@ -1,42 +1,79 @@
-> Edited for use in IDX on 07/09/12
+# Crastonic KYC with ShuftiPro Integration
 
-# Welcome to your Expo app 👋
+This is a React Native app with Expo that integrates the ShuftiPro SDK for KYC (Know Your Customer) identity verification.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Features
 
-## Get started
+- **Cross-platform**: Runs on iOS, Android, and Web
+- **ShuftiPro Integration**: Native SDK integration for iOS and Android
+- **WebView Fallback**: Graceful fallback to WebView if native SDK fails
+- **Multi-language Support**: Multiple languages supported for verification UI
+- **Dark Mode Support**: Full dark mode support for the verification flow
 
-#### Android
+## Setup Instructions
 
-Android previews are defined as a `workspace.onStart` hook and started as a vscode task when the workspace is opened/started.
+### Prerequisites
 
-Note, if you can't find the task, either:
-- Rebuild the environment (using command palette: `IDX: Rebuild Environment`), or
-- Run `npm run android -- --tunnel` command manually run android and see the output in your terminal. The device should pick up this new command and switch to start displaying the output from it.
+- Node.js 14+
+- Yarn or npm
+- Xcode (for iOS)
+- Android Studio (for Android)
 
-In the output of this command/task, you'll find options to open the app in a
+### iOS Setup
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1. Install iOS dependencies:
+   ```bash
+   ./scripts/setup-ios-shufti.sh
+   ```
 
-You'll also find options to open the app's developer menu, reload the app, and more.
+2. Run the iOS app:
+   ```bash
+   npx expo run:ios
+   ```
 
-#### Web
+3. Follow the testing instructions in [IOS_SHUFTI_INTEGRATION.md](./IOS_SHUFTI_INTEGRATION.md)
 
-Web previews will be started and managred automatically. Use the toolbar to manually refresh.
+### Android Setup
+
+1. Install Android dependencies:
+   ```bash
+   ./scripts/setup-android-sdk.js
+   ```
+
+2. Run the Android app:
+   ```bash
+   npx expo run:android
+   ```
+
+### Web Setup
+
+Web previews will be started and managed automatically. Use the toolbar to manually refresh.
+
+## ShuftiPro Integration
+
+This app integrates with ShuftiPro's KYC service for identity verification:
+
+- **Native SDK**: Uses the ShuftiPro native SDK for iOS and Android
+- **Multiple Document Types**: Supports passport, ID card, and driver's license verification
+- **Face Verification**: Includes facial recognition matching
+- **Document Capture**: Camera-based document capture and verification
+
+For details on the ShuftiPro integration, see:
+- [SHUFTIPRO_INTEGRATION.md](./SHUFTIPRO_INTEGRATION.md)
+- [IOS_SHUFTI_INTEGRATION.md](./IOS_SHUFTI_INTEGRATION.md)
+
+## Project Structure
+
+- **app/**: Main application code with file-based routing
+- **components/**: Reusable UI components
+- **services/**: API services and business logic
+- **contexts/**: React context providers
+- **hooks/**: Custom React hooks
+- **assets/**: Images, fonts, and other static assets
+
+## Development
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
 ## Learn more
 
@@ -44,10 +81,4 @@ To learn more about developing your project with Expo, look at the following res
 
 - [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
 - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [ShuftiPro documentation](https://shuftipro.com/documentation/): ShuftiPro API and SDK documentation

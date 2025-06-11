@@ -75,33 +75,72 @@ export function KYCWebView({ visible, onClose, onSuccess, onError, verificationU
       onRequestClose={onClose}
     >
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <ThemedText style={styles.closeButtonText}>✕</ThemedText>
+        <View style={[
+          styles.header,
+          Platform.OS === 'ios' ? styles.iosHeader : {}
+        ]}>
+          <TouchableOpacity onPress={onClose} style={[
+            styles.closeButton,
+            Platform.OS === 'ios' ? styles.iosCloseButton : {}
+          ]}>
+            <ThemedText style={[
+              styles.closeButtonText,
+              Platform.OS === 'ios' ? styles.iosCloseButtonText : {}
+            ]}>
+              {Platform.OS === 'ios' ? 'Cancel' : '✕'}
+            </ThemedText>
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>{t('kycTitle')}</ThemedText>
+          <ThemedText style={[
+            styles.headerTitle,
+            Platform.OS === 'ios' ? styles.iosHeaderTitle : {}
+          ]}>
+            {t('kycTitle')}
+          </ThemedText>
           <View style={styles.closeButton} />
         </View>
-        
+
         {loading && !error && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={textColor} />
-            <ThemedText style={styles.loadingText}>{t('kycLoading')}</ThemedText>
+            <ActivityIndicator
+              size={Platform.OS === 'ios' ? 'small' : 'large'}
+              color={Platform.OS === 'ios' ? '#007AFF' : textColor}
+            />
+            <ThemedText style={[
+              styles.loadingText,
+              Platform.OS === 'ios' ? styles.iosLoadingText : {}
+            ]}>
+              {t('kycLoading')}
+            </ThemedText>
           </View>
         )}
-        
+
         {error && (
           <View style={styles.errorContainer}>
-            <ThemedText style={styles.errorText}>Error loading verification page</ThemedText>
-            <TouchableOpacity 
-              style={[styles.retryButton, { backgroundColor: textColor }]}
+            <ThemedText style={[
+              styles.errorText,
+              Platform.OS === 'ios' ? styles.iosErrorText : {}
+            ]}>
+              Error loading verification page
+            </ThemedText>
+            <TouchableOpacity
+              style={[
+                styles.retryButton,
+                { backgroundColor: Platform.OS === 'ios' ? '#007AFF' : textColor },
+                Platform.OS === 'ios' ? styles.iosRetryButton : {}
+              ]}
               onPress={() => {
                 setError(false);
                 setLoading(true);
                 webViewRef.current?.reload();
               }}
             >
-              <ThemedText style={[styles.retryButtonText, { color: backgroundColor }]}>Retry</ThemedText>
+              <ThemedText style={[
+                styles.retryButtonText,
+                { color: backgroundColor },
+                Platform.OS === 'ios' ? styles.iosRetryButtonText : {}
+              ]}>
+                Retry
+              </ThemedText>
             </TouchableOpacity>
           </View>
         )}
@@ -139,41 +178,64 @@ export function KYCWebView({ visible, onClose, onSuccess, onError, verificationU
           onNavigationStateChange={handleNavigationStateChange}
           renderLoading={() => (
             <View style={styles.webViewLoading}>
-              <ActivityIndicator size="large" color={textColor} />
+              <ActivityIndicator
+                size={Platform.OS === 'ios' ? 'small' : 'large'}
+                color={Platform.OS === 'ios' ? '#007AFF' : textColor}
+              />
             </View>
           )}
+
+          // Common props
           javaScriptEnabled={true}
           domStorageEnabled={true}
           startInLoadingState={true}
-          mixedContentMode="compatibility"
           allowsInlineMediaPlayback={true}
-          mediaPlaybackRequiresUserAction={false}
-          // Android specific props
-          androidHardwareAccelerationDisabled={Platform.OS === 'android' ? false : undefined}
-          androidLayerType="hardware"
           originWhitelist={['*']}
-          scalesPageToFit={false}
-          setSupportMultipleWindows={false}
-          overScrollMode="never"
-          saveFormDataDisabled={true}
-          thirdPartyCookiesEnabled={true}
-          allowFileAccess={true}
-          allowFileAccessFromFileURLs={true}
-          allowUniversalAccessFromFileURLs={true}
-          // Fix for Android camera/file upload
+
+          // iOS specific props
+          allowsBackForwardNavigationGestures={Platform.OS === 'ios'}
+          allowsLinkPreview={Platform.OS === 'ios'}
+
+          // Platform specific settings
+          mediaPlaybackRequiresUserAction={false}
+          allowsFullscreenVideo={true}
+          applicationNameForUserAgent={'CrastonicKYC'}
+
+          // Android specific props
+          mixedContentMode={Platform.OS === 'android' ? 'always' : undefined}
+          androidHardwareAccelerationDisabled={Platform.OS === 'android' ? false : undefined}
+          androidLayerType={Platform.OS === 'android' ? 'hardware' : undefined}
+          scalesPageToFit={Platform.OS === 'android' ? true : undefined}
+          setSupportMultipleWindows={Platform.OS === 'android' ? false : undefined}
+          overScrollMode={Platform.OS === 'android' ? 'never' : undefined}
+          saveFormDataDisabled={Platform.OS === 'android' ? true : undefined}
+          thirdPartyCookiesEnabled={Platform.OS === 'android' ? true : undefined}
+          allowFileAccess={Platform.OS === 'android' ? true : undefined}
+          allowFileAccessFromFileURLs={Platform.OS === 'android' ? true : undefined}
+          allowUniversalAccessFromFileURLs={Platform.OS === 'android' ? true : undefined}
+          allowsProtectedMedia={Platform.OS === 'android' ? true : undefined}
+          useWebView2={Platform.OS === 'android' ? true : undefined}
+          cacheEnabled={true}
+          setBuiltInZoomControls={Platform.OS === 'android' ? false : undefined}
+          setDisplayZoomControls={Platform.OS === 'android' ? false : undefined}
+
+          // Permission handling for both platforms
           onPermissionRequest={(request) => {
             console.log('Permission requested:', request);
             request.grant();
           }}
-          // Enable file upload on Android
-          allowsProtectedMedia={true}
-          // User agent for better compatibility
-          userAgent={Platform.OS === 'android' ? 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36' : undefined}
-          // Fix for Android SSL issues
+
+          // User agent for platform-specific compatibility
+          userAgent={Platform.OS === 'android'
+            ? 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36'
+            : 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1 CrastonicKYC'
+          }
+
           onShouldStartLoadWithRequest={(request) => {
             console.log('Should start load:', request.url);
             return true;
           }}
+
           injectedJavaScript={`
             // Listen for ShuftiPro events
             window.addEventListener('message', function(e) {
@@ -181,7 +243,7 @@ export function KYCWebView({ visible, onClose, onSuccess, onError, verificationU
                 window.ReactNativeWebView.postMessage(JSON.stringify(e.data));
               }
             });
-            
+
             // Also capture postMessage from the page
             const originalPostMessage = window.postMessage;
             window.postMessage = function(data) {
@@ -190,12 +252,30 @@ export function KYCWebView({ visible, onClose, onSuccess, onError, verificationU
               }
               originalPostMessage.apply(window, arguments);
             };
-            
-            // Android specific: ensure viewport is set correctly
-            const meta = document.createElement('meta');
-            meta.setAttribute('name', 'viewport');
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0');
-            document.getElementsByTagName('head')[0].appendChild(meta);
+
+            // Platform-specific adjustments
+            ${Platform.OS === 'ios' ? `
+              // iOS-specific JS
+              document.body.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+              // Fix for iOS input fields
+              document.addEventListener('focusin', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({type: 'inputFocus', focused: true}));
+                }
+              });
+              document.addEventListener('focusout', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({type: 'inputFocus', focused: false}));
+                }
+              });
+            ` : `
+              // Android-specific JS
+              // Ensure viewport is set correctly
+              const meta = document.createElement('meta');
+              meta.setAttribute('name', 'viewport');
+              meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0');
+              document.getElementsByTagName('head')[0].appendChild(meta);
+            `}
           `}
         />
       </SafeAreaView>
@@ -277,5 +357,49 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  },
+
+  // iOS specific styles
+  iosHeader: {
+    paddingTop: 8,
+    paddingBottom: 8,
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(60, 60, 67, 0.29)',
+  },
+  iosHeaderTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    letterSpacing: -0.41,
+  },
+  iosCloseButton: {
+    width: 60,
+    height: 44,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  iosCloseButtonText: {
+    fontSize: 17,
+    fontWeight: '400',
+    color: '#007AFF',
+  },
+  iosLoadingText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#8E8E93',
+    letterSpacing: -0.24,
+  },
+  iosErrorText: {
+    fontSize: 15,
+    letterSpacing: -0.24,
+    color: '#3A3A3C',
+  },
+  iosRetryButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  iosRetryButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
   },
 });

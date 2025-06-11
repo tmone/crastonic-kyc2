@@ -88,10 +88,6 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace 'com.crastonic.kyc'
-    
-    dataBinding {
-        enabled = true
-    }
     defaultConfig {
         applicationId 'com.crastonic.kyc'
         minSdkVersion rootProject.ext.minSdkVersion
@@ -178,4 +174,13 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // ShuftiPro SDK dependencies
+    implementation 'com.google.android.material:material:1.10.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.github.shuftipro:android-onsite-sdk:1.6.1'
+
+    // For local SDK module access
+    implementation project(':shuftipro-onsite-mobilesdk')
 }

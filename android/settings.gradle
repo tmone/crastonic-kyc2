@@ -36,4 +36,7 @@ rootProject.name = 'crastonic-kyc'
 expoAutolinking.useExpoVersionCatalog()
 
 include ':app'
+include ':shuftipro-onsite-mobilesdk'
+project(':shuftipro-onsite-mobilesdk').projectDir = new File(rootProject.projectDir, '../node_modules/shuftipro-onsite-mobilesdk/android')
+
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
