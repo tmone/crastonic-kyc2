@@ -10,9 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
-import { ShuftiProSDKIntegration } from '@/components/ShuftiProSDKIntegration';
-import { ShuftiProSafeSDK } from '@/components/ShuftiProSafeSDK';
-import { ShuftiProWebView } from '@/components/ShuftiProWebView';
+import { ShuftiProStepperSDK } from '@/components/ShuftiProStepperSDK';
 import { VerificationResult } from '@/services/shuftiProDirectApi';
 
 const { width: deviceWidth } = Dimensions.get('window');
@@ -22,9 +20,8 @@ export default function KYCScreen() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'loading' | 'in_progress' | 'completed' | 'failed'>('idle');
-  const [verificationUrl] = useState('https://app.shuftipro.com/verification/process/4mjladGERNsawA4sEMzAF26OlLu94Cm4uXRCDrtMynHhMDTMClD7caaEmoc7fKI6');
-  const [showWebView, setShowWebView] = useState(false);
-  const [showNativeVerification, setShowNativeVerification] = useState(false);
+  const [journeyUrl] = useState('fgecdahM1749419683'); // The journey ID for ShuftiPro verification
+  const [showVerification, setShowVerification] = useState(false);
 
   // Initialize with platform detection and set SDK timeout handler
   useEffect(() => {
@@ -49,10 +46,9 @@ export default function KYCScreen() {
       if (verificationStatus === 'in_progress' || verificationStatus === 'loading') {
         console.warn('KYC verification took too long - resetting status');
         setVerificationStatus('failed');
-        setShowNativeVerification(false);
-        setShowWebView(false);
+        setShowVerification(false);
       }
-    }, 120000); // 2-minute global timeout as a last resort
+    }, 300000); // 5-minute global timeout to allow more time for verification
 
     // Cleanup function
     return () => {
@@ -71,35 +67,57 @@ export default function KYCScreen() {
   const handleVerificationComplete = (result: VerificationResult) => {
     console.log('Verification completed:', result);
 
-    if (result.status === 'verified' || result.event === 'verification.accepted' || result.event === 'verification.approved') {
-      setVerificationStatus('completed');
-      Alert.alert(
-        t('kycCompleted'),
-        'Your verification has been completed successfully.',
-        [{ text: 'OK' }]
-      );
-    } else if (result.status === 'declined' || result.event === 'verification.declined') {
-      setVerificationStatus('failed');
-      Alert.alert(
-        'Verification Declined',
-        'Your verification was declined. Please try again.',
-        [{ text: 'OK' }]
-      );
-    } else if (result.status === 'error' || result.event === 'error') {
-      setVerificationStatus('failed');
-      Alert.alert(
-        'Error',
-        'An error occurred during verification. Please try again.',
-        [{ text: 'OK' }]
-      );
-    }
+    // Ensure we're on the main thread when updating UI
+    setTimeout(() => {
+      // First set the verification status
+      if (result.status === 'verified' || result.event === 'verification.accepted' || result.event === 'verification.approved') {
+        setVerificationStatus('completed');
+      } else if (result.status === 'declined' || result.event === 'verification.declined') {
+        setVerificationStatus('failed');
+      } else if (result.status === 'error' || result.event === 'error') {
+        setVerificationStatus('failed');
+      }
 
-    setShowNativeVerification(false);
+      // Close the verification modal with a delay to ensure proper UI transition
+      setTimeout(() => {
+        setShowVerification(false);
+
+        // Show the appropriate alert based on verification result
+        setTimeout(() => {
+          if (result.status === 'verified' || result.event === 'verification.accepted' || result.event === 'verification.approved') {
+            Alert.alert(
+              t('kycCompleted'),
+              'Your verification has been completed successfully.',
+              [{ text: 'OK' }]
+            );
+          } else if (result.status === 'declined' || result.event === 'verification.declined') {
+            Alert.alert(
+              'Verification Declined',
+              'Your verification was declined. Please try again.',
+              [{ text: 'OK' }]
+            );
+          } else if (result.status === 'error' || result.event === 'error') {
+            Alert.alert(
+              'Error',
+              'An error occurred during verification. Please try again.',
+              [{ text: 'OK' }]
+            );
+          }
+        }, 300);
+      }, 300);
+    }, 0);
   };
 
   const handleVerificationCancel = () => {
-    setShowNativeVerification(false);
-    setVerificationStatus('idle');
+    // Ensure we're on the main thread when updating UI
+    setTimeout(() => {
+      setVerificationStatus('idle');
+
+      // Close the verification modal with a delay to ensure proper UI transition
+      setTimeout(() => {
+        setShowVerification(false);
+      }, 300);
+    }, 0);
   };
 
   const requestPermissions = async (): Promise<boolean> => {
@@ -172,17 +190,11 @@ export default function KYCScreen() {
     setTimeout(() => {
       setVerificationStatus('in_progress');
 
-      // Always use native SDK for verification
-      setShowNativeVerification(true);
+      // Show the journey-based verification
+      setShowVerification(true);
     }, 1000);
   };
 
-  const handleWebViewClose = () => {
-    setShowWebView(false);
-    if (verificationStatus === 'in_progress') {
-      setVerificationStatus('idle');
-    }
-  };
 
   const getStatusMessage = () => {
     switch (verificationStatus) {
@@ -228,42 +240,55 @@ export default function KYCScreen() {
     }
   };
 
-  // Handle fallback to WebView if needed
+  // Handle verification errors with enhanced error handling
   const handleVerificationError = (error: any) => {
     console.error('Verification error:', error);
 
-    // Mark verification as failed
-    setVerificationStatus('failed');
-    setShowNativeVerification(false);
+    // Ensure we're on the main thread when updating UI
+    setTimeout(() => {
+      // Mark verification as failed
+      setVerificationStatus('failed');
 
-    // Show error without WebView fallback option
-    if (!showWebView) {
-      Alert.alert(
-        'Verification Error',
-        'There was an error with the verification process. Would you like to try again?',
-        [
-          {
-            text: 'No',
-            style: 'cancel',
-            onPress: () => setVerificationStatus('idle')
-          },
-          {
-            text: 'Try Again',
-            onPress: () => {
-              // Reset and try again with SDK
-              setVerificationStatus('idle');
-              setTimeout(() => startVerification(), 500);
-            }
+      // Close the verification modal with a delay to ensure proper UI transition
+      setTimeout(() => {
+        setShowVerification(false);
+
+        // Determine the error message based on the error type
+        let errorMessage = 'There was an error with the verification process.';
+
+        if (error && error.error) {
+          if (typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.error.message) {
+            errorMessage = error.error.message;
           }
-        ]
-      );
-    } else {
-      Alert.alert(
-        'Verification Error',
-        'There was an error with the verification process. Please try again later.',
-        [{ text: 'OK' }]
-      );
-    }
+        } else if (error && error.verification_result && error.verification_result.error) {
+          errorMessage = error.verification_result.error.message ||
+                        'Verification was not successful. Please check your information and try again.';
+        }
+
+        // Show error with retry option
+        Alert.alert(
+          'Verification Error',
+          `${errorMessage} Would you like to try again?`,
+          [
+            {
+              text: 'No',
+              style: 'cancel',
+              onPress: () => setVerificationStatus('idle')
+            },
+            {
+              text: 'Try Again',
+              onPress: () => {
+                // Reset and try again with sufficient delay to ensure UI is ready
+                setVerificationStatus('idle');
+                setTimeout(() => startVerification(), 1000);
+              }
+            }
+          ]
+        );
+      }, 300);
+    }, 0);
   };
 
   return (
@@ -338,37 +363,20 @@ export default function KYCScreen() {
         </ThemedView>
       </ParallaxScrollView>
 
-      {/* Native Verification Modal */}
+      {/* KYC Verification Modal */}
       <Modal
-        visible={showNativeVerification}
+        visible={showVerification}
         animationType="slide"
         transparent={false}
         onRequestClose={handleVerificationCancel}
       >
-        <ShuftiProSafeSDK
+        <ShuftiProStepperSDK
           onComplete={handleVerificationComplete}
           onCancel={handleVerificationCancel}
           onError={handleVerificationError}
-          verificationUrl={verificationUrl}
+          journeyId={journeyUrl}
         />
       </Modal>
-
-      {/* WebView Fallback (only used if native verification fails) */}
-      <ShuftiProWebView
-        visible={showWebView}
-        onClose={handleWebViewClose}
-        onSuccess={(data) => handleVerificationComplete({
-          status: 'verified',
-          event: 'verification.accepted',
-          verification_result: data
-        })}
-        onError={(error) => handleVerificationComplete({
-          status: 'error',
-          error,
-          event: 'error'
-        })}
-        verificationUrl={verificationUrl}
-      />
     </>
   );
 }
