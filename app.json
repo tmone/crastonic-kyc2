@@ -8,9 +8,16 @@
     "scheme": "crastonickyc",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "jsEngine": "hermes",
+    "developmentClient": false,
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "enabled": false,
+      "checkAutomatically": "ON_ERROR_RECOVERY"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.crastonic.kyc",
+      "bundleIdentifier": "com.thinhcrastonic.crastonic-kyc",
       "buildConfiguration": {
         "developmentClient": false,
         "distribution": "internal"
@@ -18,8 +25,15 @@
       "infoPlist": {
         "EXDisableDevMenu": true,
         "EXNoDevClient": true,
-        "UIBackgroundModes": ["location", "fetch"],
-        "NSAllowsArbitraryLoads": true
+        "NSAllowsArbitraryLoads": true,
+        "NSCameraUsageDescription": "This app needs access to camera for identity verification",
+        "NSMicrophoneUsageDescription": "This app needs access to microphone for video verification",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library for identity verification",
+        "NSPhotoLibraryAddUsageDescription": "This app needs access to save photos to your library for identity verification",
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location for verification purposes",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location for verification purposes",
+        "NSLocationAlwaysUsageDescription": "This app needs access to your location in the background for verification purposes",
+        "UIBackgroundModes": ["location", "fetch"]
       }
     },
     "android": {
@@ -27,6 +41,12 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
       "edgeToEdgeEnabled": true,
       "package": "com.crastonic.kyc"
     },

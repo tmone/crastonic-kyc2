@@ -22,7 +22,7 @@ module.exports = {
 
   ios: {
     supportsTablet: true,
-    bundleIdentifier: "com.crastonic.kyc",
+    bundleIdentifier: "com.thinhcrastonic.crastonic-kyc",
     buildConfiguration: {
       developmentClient: false,
       distribution: "internal"
