@@ -16,40 +16,41 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 const { width } = Dimensions.get('window');
-
-// Crastonic Brand Colors
-const colors = {
-  // Primary Colors
-  primary: '#4A90E2', // Crastonic Blue - Trust & Security
-  secondary: '#7B68EE', // Purple - Innovation & Web3
-  
-  // Accent Colors
-  success: '#27AE60', // Green - Growth & Success
-  warning: '#F39C12', // Orange - Activity
-  danger: '#E74C3C', // Red - Important alerts
-  
-  // Neutral Colors
-  dark: '#1a1a2e', // Dark Navy - Premium feel
-  darkSecondary: '#16213e', // Darker Navy
-  gray1: '#333333', // Text primary
-  gray2: '#666666', // Text secondary
-  gray3: '#999999', // Text tertiary
-  gray4: '#E5E5E5', // Borders
-  gray5: '#F8F9FA', // Background
-  white: '#FFFFFF',
-  
-  // Gradient Colors
-  gradientStart: '#4A90E2',
-  gradientEnd: '#7B68EE',
-  darkGradientStart: '#1a1a2e',
-  darkGradientEnd: '#0f0f1e',
-};
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
+  const colorScheme = useColorScheme();
+  
+  // Theme-aware colors
+  const colors = {
+    primary: useThemeColor({}, 'primary'),
+    secondary: useThemeColor({}, 'secondary'),
+    success: useThemeColor({}, 'success'),
+    warning: useThemeColor({}, 'warning'),
+    danger: useThemeColor({}, 'danger'),
+    dark: useThemeColor({}, 'dark'),
+    darkSecondary: useThemeColor({}, 'darkSecondary'),
+    gray1: useThemeColor({}, 'gray1'),
+    gray2: useThemeColor({}, 'gray2'),
+    gray3: useThemeColor({}, 'gray3'),
+    gray4: useThemeColor({}, 'gray4'),
+    gray5: useThemeColor({}, 'gray5'),
+    white: useThemeColor({}, 'white'),
+    gradientStart: useThemeColor({}, 'gradientStart'),
+    gradientEnd: useThemeColor({}, 'gradientEnd'),
+    darkGradientStart: useThemeColor({}, 'darkGradientStart'),
+    darkGradientEnd: useThemeColor({}, 'darkGradientEnd'),
+    cardBackground: useThemeColor({}, 'cardBackground'),
+    headerBackground: useThemeColor({}, 'headerBackground'),
+    background: useThemeColor({}, 'background'),
+    text: useThemeColor({}, 'text'),
+  };
   
   const [refreshing, setRefreshing] = useState(false);
   const [userProfile, setUserProfile] = useState({
@@ -70,7 +71,7 @@ export default function HomeScreen() {
       expectedReturn: '12',
       tokensLeft: 234,
       totalTokens: 1000,
-      image: 'https://via.placeholder.com/300x200',
+      image: require('../../assets/images/apartment/1.jpg'),
     },
     {
       id: '2',
@@ -80,7 +81,27 @@ export default function HomeScreen() {
       expectedReturn: '10',
       tokensLeft: 567,
       totalTokens: 2000,
-      image: 'https://via.placeholder.com/300x200',
+      image: require('../../assets/images/apartment/2.jpg'),
+    },
+    {
+      id: '3',
+      name: 'Ocean View Residence',
+      location: 'District 1, HCMC',
+      minInvestment: '0.2',
+      expectedReturn: '15',
+      tokensLeft: 89,
+      totalTokens: 500,
+      image: require('../../assets/images/apartment/3.jpg'),
+    },
+    {
+      id: '4',
+      name: 'Sky Garden Complex',
+      location: 'District 3, HCMC',
+      minInvestment: '0.08',
+      expectedReturn: '11',
+      tokensLeft: 445,
+      totalTokens: 1500,
+      image: require('../../assets/images/apartment/4.jpg'),
     },
   ]);
 
@@ -133,7 +154,7 @@ export default function HomeScreen() {
 
   const renderHeader = () => (
     <LinearGradient
-      colors={[colors.white, colors.gray5]}
+      colors={[colors.headerBackground, colors.gray5]}
       style={styles.header}
     >
       <View style={styles.headerTop}>
@@ -150,7 +171,7 @@ export default function HomeScreen() {
       </View>
       <View style={styles.headerGreeting}>
         <Text style={styles.greeting}>{t('hello', { name: userProfile.name })}</Text>
-        <Text style={styles.date}>{new Date().toLocaleDateString('en-US', { 
+        <Text style={[styles.date, { color: colors.gray2 }]}>{new Date().toLocaleDateString('en-US', { 
           weekday: 'long', 
           year: 'numeric', 
           month: 'long', 
@@ -190,35 +211,40 @@ export default function HomeScreen() {
   );
 
   const renderPortfolioOverview = () => (
-    <View style={styles.portfolioCard}>
+    <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleWrapper}>
           <Feather name="trending-up" size={22} color={colors.primary} style={styles.sectionIcon} />
           <Text style={styles.sectionTitle}>{t('portfolioOverview')}</Text>
         </View>
       </View>
+      <View style={styles.portfolioCard}>
       <View style={styles.portfolioStats}>
         <View style={styles.statItem}>
-          <Text style={styles.statLabel}>{t('totalAssets')}</Text>
-          <Text style={styles.statValue}>{userProfile.totalAssets} ETH</Text>
+          <View style={styles.statHeader}>
+            <Text style={styles.statLabel}>{t('totalAssets')}</Text>
+            <Text style={styles.statValue}>{userProfile.totalAssets} ETH</Text>
+          </View>
           <View style={styles.statBar}>
             <View style={[styles.statBarFill, { width: '75%', backgroundColor: colors.primary }]} />
           </View>
         </View>
-        <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statLabel}>{t('monthlyReturn')}</Text>
-          <Text style={[styles.statValue, styles.positiveValue]}>
-            {userProfile.monthlyReturn}%
-          </Text>
+          <View style={styles.statHeader}>
+            <Text style={styles.statLabel}>{t('monthlyReturn')}</Text>
+            <Text style={[styles.statValue, styles.positiveValue]}>
+              {userProfile.monthlyReturn}%
+            </Text>
+          </View>
           <View style={styles.statBar}>
             <View style={[styles.statBarFill, { width: '85%', backgroundColor: colors.success }]} />
           </View>
         </View>
-        <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statLabel}>{t('rentalIncome')}</Text>
-          <Text style={styles.statValue}>{userProfile.rentalIncome} ETH/mo</Text>
+          <View style={styles.statHeader}>
+            <Text style={styles.statLabel}>{t('rentalIncome')}</Text>
+            <Text style={styles.statValue}>{userProfile.rentalIncome} ETH/mo</Text>
+          </View>
           <View style={styles.statBar}>
             <View style={[styles.statBarFill, { width: '60%', backgroundColor: colors.secondary }]} />
           </View>
@@ -234,12 +260,13 @@ export default function HomeScreen() {
           <Text style={styles.manageButtonText}>{t('managePortfolio')}</Text>
           <Feather name="arrow-right" size={18} color={colors.white} />
         </LinearGradient>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
   const renderQuickActions = () => (
-    <View style={styles.quickActions}>
+    <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleWrapper}>
           <Feather name="zap" size={22} color={colors.primary} style={styles.sectionIcon} />
@@ -287,11 +314,16 @@ export default function HomeScreen() {
     </View>
   );
 
-  const renderFeaturedProject = ({ item }) => (
+  const renderFeaturedProject = ({ item }: { item: any }) => (
     <TouchableOpacity style={styles.projectCard}>
-      <Image source={{ uri: item.image }} style={styles.projectImage} contentFit="cover" />
+      <Image source={item.image} style={styles.projectImage} contentFit="cover" />
       <LinearGradient
-        colors={['transparent', 'rgba(26, 26, 46, 0.9)']}
+        colors={[
+          'transparent', 
+          colorScheme === 'dark' 
+            ? 'rgba(0, 0, 0, 0.9)' 
+            : 'rgba(26, 26, 46, 0.9)'
+        ]}
         style={styles.projectGradient}
       >
         <View style={styles.projectInfo}>
@@ -335,7 +367,7 @@ export default function HomeScreen() {
   );
 
   const renderFeaturedProjects = () => (
-    <View style={styles.featuredSection}>
+    <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleWrapper}>
           <Feather name="home" size={22} color={colors.primary} style={styles.sectionIcon} />
@@ -357,7 +389,7 @@ export default function HomeScreen() {
   );
 
   const renderUserAssets = () => (
-    <View style={styles.assetsSection}>
+    <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleWrapper}>
           <Feather name="briefcase" size={22} color={colors.primary} style={styles.sectionIcon} />
@@ -386,40 +418,46 @@ export default function HomeScreen() {
   );
 
   const renderMarketOverview = () => (
-    <View style={styles.marketCard}>
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionTitleWrapper}>
+          <Feather name="bar-chart-2" size={22} color={colors.primary} style={styles.sectionIcon} />
+          <Text style={styles.sectionTitle}>{t('rwaMarketOverview')}</Text>
+        </View>
+      </View>
+      <View style={styles.marketCard}>
       <LinearGradient
         colors={[colors.primary + '10', colors.secondary + '10']}
         style={styles.marketCardGradient}
       >
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleWrapper}>
-            <Feather name="bar-chart-2" size={22} color={colors.primary} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>{t('rwaMarketOverview')}</Text>
-          </View>
-        </View>
         <View style={styles.marketStats}>
           <View style={styles.marketStatItem}>
-            <Text style={styles.marketStatLabel}>{t('totalMarketCap')}</Text>
-            <Text style={styles.marketStatValue}>$10.62B</Text>
+            <View style={styles.marketStatHeader}>
+              <Text style={styles.marketStatLabel}>{t('totalMarketCap')}</Text>
+              <Text style={styles.marketStatValue}>$10.62B</Text>
+            </View>
             <Text style={styles.marketStatChange}>+5.2% (24h)</Text>
           </View>
-          <View style={styles.marketStatDivider} />
           <View style={styles.marketStatItem}>
-            <Text style={styles.marketStatLabel}>{t('activeProjects')}</Text>
-            <Text style={styles.marketStatValue}>1,234</Text>
+            <View style={styles.marketStatHeader}>
+              <Text style={styles.marketStatLabel}>{t('activeProjects')}</Text>
+              <Text style={styles.marketStatValue}>1,234</Text>
+            </View>
           </View>
-          <View style={styles.marketStatDivider} />
           <View style={styles.marketStatItem}>
-            <Text style={styles.marketStatLabel}>{t('volumeDay')}</Text>
-            <Text style={styles.marketStatValue}>$125M</Text>
+            <View style={styles.marketStatHeader}>
+              <Text style={styles.marketStatLabel}>{t('volumeDay')}</Text>
+              <Text style={styles.marketStatValue}>$125M</Text>
+            </View>
           </View>
         </View>
       </LinearGradient>
+      </View>
     </View>
   );
 
   const renderTrendingProjects = () => (
-    <View style={styles.trendingSection}>
+    <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleWrapper}>
           <Feather name="trending-up" size={22} color={colors.primary} style={styles.sectionIcon} />
@@ -446,9 +484,11 @@ export default function HomeScreen() {
   );
 
 
+  const styles = getStyles(colors);
+
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
+      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
       <ScrollView
         style={styles.scrollView}
         refreshControl={
@@ -476,10 +516,14 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.gray5,
+  },
+  section: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
   },
   scrollView: {
     flex: 1,
@@ -510,7 +554,7 @@ const styles = StyleSheet.create({
   logoFullText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.gray1,
+    color: colors.text,
     letterSpacing: 1,
   },
   headerGreeting: {
@@ -610,9 +654,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   portfolioCard: {
-    backgroundColor: colors.white,
-    marginHorizontal: 20,
-    marginBottom: 20,
+    backgroundColor: colors.cardBackground,
     borderRadius: 20,
     padding: 24,
     elevation: 2,
@@ -624,33 +666,32 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.gray1,
+    color: colors.text,
     marginLeft: 0,
   },
   portfolioStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    gap: 16,
     marginBottom: 24,
   },
   statItem: {
-    flex: 1,
-    alignItems: 'center',
+    // No flex needed for column layout
   },
-  statDivider: {
-    width: 1,
-    backgroundColor: colors.gray4,
-    marginHorizontal: 10,
+  statHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: colors.gray2,
-    marginBottom: 6,
+    fontWeight: '500',
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: colors.gray1,
-    marginBottom: 8,
+    color: colors.text,
   },
   positiveValue: {
     color: colors.success,
@@ -706,7 +747,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 12,
-    color: colors.gray1,
+    color: colors.text,
     textAlign: 'center',
     fontWeight: '500',
   },
@@ -719,7 +760,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
-    paddingHorizontal: 20,
   },
   sectionTitleWrapper: {
     flexDirection: 'row',
@@ -734,7 +774,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   projectsList: {
-    paddingHorizontal: 20,
+    paddingLeft: 0,
+    paddingRight: 20,
   },
   projectCard: {
     width: width * 0.85,
@@ -827,14 +868,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: 'rgba(255, 255, 255, 0.9)',
   },
-  assetsSection: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
   assetItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
+    backgroundColor: colors.cardBackground,
     padding: 18,
     borderRadius: 16,
     marginBottom: 12,
@@ -859,7 +896,7 @@ const styles = StyleSheet.create({
   assetName: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.gray1,
+    color: colors.text,
   },
   assetTokens: {
     fontSize: 13,
@@ -880,8 +917,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   marketCard: {
-    marginHorizontal: 20,
-    marginBottom: 24,
     borderRadius: 20,
     overflow: 'hidden',
   },
@@ -890,45 +925,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   marketStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',
+    gap: 12,
     paddingHorizontal: 20,
   },
   marketStatItem: {
-    flex: 1,
-    alignItems: 'center',
+    paddingVertical: 8,
   },
-  marketStatDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: colors.gray4,
-    marginHorizontal: 10,
+  marketStatHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   marketStatLabel: {
-    fontSize: 11,
+    fontSize: 14,
     color: colors.gray2,
-    marginBottom: 4,
+    fontWeight: '500',
   },
   marketStatValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.gray1,
+    color: colors.text,
   },
   marketStatChange: {
-    fontSize: 11,
+    fontSize: 12,
     color: colors.success,
-    marginTop: 2,
-  },
-  trendingSection: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
+    fontWeight: '500',
   },
   trendingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.white,
+    backgroundColor: colors.cardBackground,
     padding: 16,
     borderRadius: 16,
     marginBottom: 12,
@@ -959,7 +988,7 @@ const styles = StyleSheet.create({
   },
   trendingName: {
     fontSize: 15,
-    color: colors.gray1,
+    color: colors.text,
     fontWeight: '500',
   },
   trendingRight: {
