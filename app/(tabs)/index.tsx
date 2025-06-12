@@ -122,14 +122,11 @@ export default function HomeScreen() {
 
   const CrastonicLogo = () => (
     <View style={styles.logoContainer}>
-      <LinearGradient
-        colors={[colors.primary, colors.secondary]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.logoGradient}
-      >
-        <Text style={styles.logoText}>C</Text>
-      </LinearGradient>
+      <Image
+        source={require('@/assets/images/icon.png')}
+        style={styles.logoImage}
+        contentFit="contain"
+      />
       <Text style={styles.logoFullText}>CRASTONIC</Text>
     </View>
   );
@@ -497,23 +494,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 15,
+    height: 44,
   },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  logoGradient: {
+  logoImage: {
     width: 36,
     height: 36,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 8,
+    overflow: 'hidden',
     marginRight: 8,
-  },
-  logoText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.white,
   },
   logoFullText: {
     fontSize: 18,
