@@ -32,18 +32,18 @@ function TabNavigator() {
             tabBarStyle: Platform.select({
               ios: {
                 position: 'absolute',
-                backgroundColor: actualTheme === 'dark' ? 'rgba(17, 17, 21, 0.88)' : undefined,
+                backgroundColor: actualTheme === 'dark' ? 'rgba(17, 17, 21, 0.88)' : 'rgba(255, 255, 255, 0.95)',
                 height: 88,
                 borderTopWidth: 0,
               },
               default: {},
             }),
-            tabBarBackground: () => actualTheme === 'dark' ? (
+            tabBarBackground: () => (
               <View style={{ 
                 flex: 1, 
-                backgroundColor: 'rgba(17, 17, 21, 0.88)' 
+                backgroundColor: actualTheme === 'dark' ? 'rgba(17, 17, 21, 0.88)' : '#FFFFFF' 
               }} />
-            ) : null,
+            ),
           }}>
           <Tab.Screen
             name="Home"
