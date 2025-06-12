@@ -19,6 +19,11 @@ module.exports = {
     enabled: false,
   },
 
+  // Disable linking for standalone builds to avoid errors
+  linking: {
+    enabled: false,
+  },
+
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.thinhcrastonic.crastonic-kyc",
@@ -50,7 +55,7 @@ module.exports = {
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/images/adaptive-icon.png",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#111115e0"
     },
     permissions: [
       "CAMERA",
@@ -74,7 +79,7 @@ module.exports = {
         image: "./assets/images/splash-icon.png",
         imageWidth: 200,
         resizeMode: "contain",
-        backgroundColor: "#ffffff"
+        backgroundColor: "#111115e0"
       }
     ],
     "./plugins/withShuftiPro"
