@@ -149,7 +149,7 @@ export default function HomeScreen() {
         </View>
       </View>
       <View style={styles.headerGreeting}>
-        <Text style={styles.greeting}>Hello, {userProfile.name}!</Text>
+        <Text style={styles.greeting}>{t('hello', { name: userProfile.name })}</Text>
         <Text style={styles.date}>{new Date().toLocaleDateString('en-US', { 
           weekday: 'long', 
           year: 'numeric', 
@@ -176,13 +176,13 @@ export default function HomeScreen() {
         <View style={styles.kycLeft}>
           <View style={styles.kycBadge}>
             <Feather name="shield" size={20} color={colors.white} />
-            <Text style={styles.kycBadgeText}>KYC Verified</Text>
+            <Text style={styles.kycBadgeText}>{t('kycVerified')}</Text>
           </View>
-          <Text style={styles.kycLevel}>{userProfile.kycLevel} Member</Text>
-          <Text style={styles.kycDate}>Verified on June 5, 2025</Text>
+          <Text style={styles.kycLevel}>{t('goldMember')}</Text>
+          <Text style={styles.kycDate}>{t('verifiedDate')}</Text>
         </View>
         <TouchableOpacity style={styles.viewDetailsButton}>
-          <Text style={styles.viewDetailsText}>View Details</Text>
+          <Text style={styles.viewDetailsText}>{t('viewDetails')}</Text>
           <Feather name="chevron-right" size={16} color={colors.white} />
         </TouchableOpacity>
       </View>
@@ -194,12 +194,12 @@ export default function HomeScreen() {
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleWrapper}>
           <Feather name="trending-up" size={22} color={colors.primary} style={styles.sectionIcon} />
-          <Text style={styles.sectionTitle}>Portfolio Overview</Text>
+          <Text style={styles.sectionTitle}>{t('portfolioOverview')}</Text>
         </View>
       </View>
       <View style={styles.portfolioStats}>
         <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Total Assets</Text>
+          <Text style={styles.statLabel}>{t('totalAssets')}</Text>
           <Text style={styles.statValue}>{userProfile.totalAssets} ETH</Text>
           <View style={styles.statBar}>
             <View style={[styles.statBarFill, { width: '75%', backgroundColor: colors.primary }]} />
@@ -207,7 +207,7 @@ export default function HomeScreen() {
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Monthly Return</Text>
+          <Text style={styles.statLabel}>{t('monthlyReturn')}</Text>
           <Text style={[styles.statValue, styles.positiveValue]}>
             {userProfile.monthlyReturn}%
           </Text>
@@ -217,7 +217,7 @@ export default function HomeScreen() {
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Rental Income</Text>
+          <Text style={styles.statLabel}>{t('rentalIncome')}</Text>
           <Text style={styles.statValue}>{userProfile.rentalIncome} ETH/mo</Text>
           <View style={styles.statBar}>
             <View style={[styles.statBarFill, { width: '60%', backgroundColor: colors.secondary }]} />
@@ -231,7 +231,7 @@ export default function HomeScreen() {
           end={{ x: 1, y: 0 }}
           style={styles.manageButtonGradient}
         >
-          <Text style={styles.manageButtonText}>Manage Portfolio</Text>
+          <Text style={styles.manageButtonText}>{t('managePortfolio')}</Text>
           <Feather name="arrow-right" size={18} color={colors.white} />
         </LinearGradient>
       </TouchableOpacity>
@@ -243,7 +243,7 @@ export default function HomeScreen() {
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleWrapper}>
           <Feather name="zap" size={22} color={colors.primary} style={styles.sectionIcon} />
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <Text style={styles.sectionTitle}>{t('quickActions')}</Text>
         </View>
       </View>
       <View style={styles.actionGrid}>
@@ -254,7 +254,7 @@ export default function HomeScreen() {
           >
             <Feather name="shopping-cart" size={24} color={colors.primary} />
           </LinearGradient>
-          <Text style={styles.actionText}>Buy Tokens</Text>
+          <Text style={styles.actionText}>{t('buyTokens')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionItem}>
           <LinearGradient
@@ -263,7 +263,7 @@ export default function HomeScreen() {
           >
             <Feather name="trending-up" size={24} color={colors.success} />
           </LinearGradient>
-          <Text style={styles.actionText}>Sell Tokens</Text>
+          <Text style={styles.actionText}>{t('sellTokens')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionItem}>
           <LinearGradient
@@ -272,7 +272,7 @@ export default function HomeScreen() {
           >
             <Feather name="send" size={24} color={colors.warning} />
           </LinearGradient>
-          <Text style={styles.actionText}>Transfer</Text>
+          <Text style={styles.actionText}>{t('transfer')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionItem}>
           <LinearGradient
@@ -281,7 +281,7 @@ export default function HomeScreen() {
           >
             <Feather name="bar-chart-2" size={24} color={colors.secondary} />
           </LinearGradient>
-          <Text style={styles.actionText}>Reports</Text>
+          <Text style={styles.actionText}>{t('reports')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -296,7 +296,7 @@ export default function HomeScreen() {
       >
         <View style={styles.projectInfo}>
           <View style={styles.projectBadge}>
-            <Text style={styles.projectBadgeText}>FEATURED</Text>
+            <Text style={styles.projectBadgeText}>{t('featured')}</Text>
           </View>
           <Text style={styles.projectName}>{item.name}</Text>
           <View style={styles.projectLocation}>
@@ -305,12 +305,12 @@ export default function HomeScreen() {
           </View>
           <View style={styles.projectStats}>
             <View style={styles.projectStat}>
-              <Text style={styles.projectStatLabel}>Min. Investment</Text>
+              <Text style={styles.projectStatLabel}>{t('minInvestment')}</Text>
               <Text style={styles.projectStatValue}>{item.minInvestment} ETH</Text>
             </View>
             <View style={styles.projectStat}>
-              <Text style={styles.projectStatLabel}>Expected Return</Text>
-              <Text style={styles.projectStatValue}>{item.expectedReturn}%/year</Text>
+              <Text style={styles.projectStatLabel}>{t('expectedReturn')}</Text>
+              <Text style={styles.projectStatValue}>{item.expectedReturn}{t('ethPerYear')}</Text>
             </View>
           </View>
           <View style={styles.tokenProgress}>
@@ -326,7 +326,7 @@ export default function HomeScreen() {
               />
             </View>
             <Text style={styles.tokenText}>
-              {item.tokensLeft}/{item.totalTokens} tokens left
+              {t('tokensLeft', { tokensLeft: item.tokensLeft.toString(), totalTokens: item.totalTokens.toString() })}
             </Text>
           </View>
         </View>
@@ -339,10 +339,10 @@ export default function HomeScreen() {
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleWrapper}>
           <Feather name="home" size={22} color={colors.primary} style={styles.sectionIcon} />
-          <Text style={styles.sectionTitle}>Featured Properties</Text>
+          <Text style={styles.sectionTitle}>{t('featuredProperties')}</Text>
         </View>
         <TouchableOpacity>
-          <Text style={styles.seeAllText}>See All</Text>
+          <Text style={styles.seeAllText}>{t('seeAll')}</Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -361,10 +361,10 @@ export default function HomeScreen() {
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleWrapper}>
           <Feather name="briefcase" size={22} color={colors.primary} style={styles.sectionIcon} />
-          <Text style={styles.sectionTitle}>Your Assets</Text>
+          <Text style={styles.sectionTitle}>{t('yourAssets')}</Text>
         </View>
         <TouchableOpacity>
-          <Text style={styles.seeAllText}>Manage</Text>
+          <Text style={styles.seeAllText}>{t('manage')}</Text>
         </TouchableOpacity>
       </View>
       {userAssets.map((asset) => (
@@ -374,11 +374,11 @@ export default function HomeScreen() {
           </View>
           <View style={styles.assetLeft}>
             <Text style={styles.assetName}>{asset.name}</Text>
-            <Text style={styles.assetTokens}>{asset.tokens} tokens</Text>
+            <Text style={styles.assetTokens}>{asset.tokens} {t('tokens')}</Text>
           </View>
           <View style={styles.assetRight}>
-            <Text style={styles.assetIncome}>{asset.monthlyIncome} ETH/mo</Text>
-            <Text style={styles.assetIncomeLabel}>Income</Text>
+            <Text style={styles.assetIncome}>{asset.monthlyIncome} {t('ethPerMonth')}</Text>
+            <Text style={styles.assetIncomeLabel}>{t('income')}</Text>
           </View>
         </TouchableOpacity>
       ))}
@@ -394,23 +394,23 @@ export default function HomeScreen() {
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleWrapper}>
             <Feather name="bar-chart-2" size={22} color={colors.primary} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>RWA Market Overview</Text>
+            <Text style={styles.sectionTitle}>{t('rwaMarketOverview')}</Text>
           </View>
         </View>
         <View style={styles.marketStats}>
           <View style={styles.marketStatItem}>
-            <Text style={styles.marketStatLabel}>Total Market Cap</Text>
+            <Text style={styles.marketStatLabel}>{t('totalMarketCap')}</Text>
             <Text style={styles.marketStatValue}>$10.62B</Text>
             <Text style={styles.marketStatChange}>+5.2% (24h)</Text>
           </View>
           <View style={styles.marketStatDivider} />
           <View style={styles.marketStatItem}>
-            <Text style={styles.marketStatLabel}>Active Projects</Text>
+            <Text style={styles.marketStatLabel}>{t('activeProjects')}</Text>
             <Text style={styles.marketStatValue}>1,234</Text>
           </View>
           <View style={styles.marketStatDivider} />
           <View style={styles.marketStatItem}>
-            <Text style={styles.marketStatLabel}>24h Volume</Text>
+            <Text style={styles.marketStatLabel}>{t('volumeDay')}</Text>
             <Text style={styles.marketStatValue}>$125M</Text>
           </View>
         </View>
@@ -423,7 +423,7 @@ export default function HomeScreen() {
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleWrapper}>
           <Feather name="trending-up" size={22} color={colors.primary} style={styles.sectionIcon} />
-          <Text style={styles.sectionTitle}>Trending Projects</Text>
+          <Text style={styles.sectionTitle}>{t('trendingProjects')}</Text>
         </View>
       </View>
       {trendingProjects.map((project, index) => (
