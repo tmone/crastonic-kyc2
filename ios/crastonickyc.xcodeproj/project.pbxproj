@@ -14,6 +14,7 @@
 		D6BF588657D7DD51520D00D4 /* libPods-crastonickyc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 20385C47CD82E748170361BC /* libPods-crastonickyc.a */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 		F63C315DFC797204EF552A83 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4D0BC0AFBBBE56D5599096B3 /* PrivacyInfo.xcprivacy */; };
+		F11748452D0307B40044C1D9 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = F11748432D0307B40044C1D9 /* main.jsbundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,12 +22,13 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = crastonickyc/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = crastonickyc/Info.plist; sourceTree = "<group>"; };
 		20385C47CD82E748170361BC /* libPods-crastonickyc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-crastonickyc.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4D0BC0AFBBBE56D5599096B3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = crastonickyc/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		4D0BC0AFBBBE56D5599096B3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = crastonickyc/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = crastonickyc/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		D848DF6EABED17C453C48CA3 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-crastonickyc/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = crastonickyc/AppDelegate.swift; sourceTree = "<group>"; };
+		F11748432D0307B40044C1D9 /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* crastonickyc-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "crastonickyc-Bridging-Header.h"; path = "crastonickyc/crastonickyc-Bridging-Header.h"; sourceTree = "<group>"; };
 		F711B172B4385123D0642C29 /* Pods-crastonickyc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-crastonickyc.debug.xcconfig"; path = "Target Support Files/Pods-crastonickyc/Pods-crastonickyc.debug.xcconfig"; sourceTree = "<group>"; };
 		F7F9AD4231EFB0B2E1518D6B /* Pods-crastonickyc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-crastonickyc.release.xcconfig"; path = "Target Support Files/Pods-crastonickyc/Pods-crastonickyc.release.xcconfig"; sourceTree = "<group>"; };
@@ -91,6 +93,7 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				D5D3DAE30AB4877C378E79F0 /* Pods */,
 				9E7F768960F732542C96CD43 /* ExpoModulesProviders */,
+				F11748432D0307B40044C1D9 /* main.jsbundle */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -128,7 +131,6 @@
 				F711B172B4385123D0642C29 /* Pods-crastonickyc.debug.xcconfig */,
 				F7F9AD4231EFB0B2E1518D6B /* Pods-crastonickyc.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -197,6 +199,7 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				F63C315DFC797204EF552A83 /* PrivacyInfo.xcprivacy in Resources */,
+				F11748452D0307B40044C1D9 /* main.jsbundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -380,6 +383,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = crastonickyc/crastonickyc.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HKPG9TBWG6;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -416,6 +420,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = crastonickyc/crastonickyc.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HKPG9TBWG6;
 				INFOPLIST_FILE = crastonickyc/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -493,10 +498,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -551,10 +553,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

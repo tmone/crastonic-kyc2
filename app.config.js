@@ -14,10 +14,9 @@ module.exports = {
   developmentClient: false,
   runtimeVersion: "1.0.0",
 
-  // Disable expo client
+  // Disable expo client and updates for standalone builds
   updates: {
     enabled: false,
-    checkAutomatically: "ON_ERROR_RECOVERY",
   },
 
   ios: {

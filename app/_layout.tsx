@@ -9,7 +9,8 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { DarkModeBackground } from '@/components/DarkModeBackground';
 
 import {NativeModules} from 'react-native';
-const {ShuftiproReactNativeModule} = NativeModules;
+// Only access ShuftiPro module in development or when it's available
+const ShuftiproReactNativeModule = __DEV__ ? NativeModules.ShuftiproReactNativeModule : null;
 
 function RootLayoutNav() {
   const { actualTheme } = useTheme();

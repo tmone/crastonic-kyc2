@@ -1,7 +1,8 @@
 {
   "cli": {
     "version": ">= 16.9.0",
-    "promptToConfigurePushNotifications": false
+    "promptToConfigurePushNotifications": false,
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
@@ -17,8 +18,20 @@
         "simulator": true
       }
     },
+    "standalone": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "ios": {
+        "simulator": true,
+        "buildConfiguration": "Release"
+      }
+    },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "developmentClient": false,
+      "ios": {
+        "buildConfiguration": "Release"
+      }
     }
   }
 }

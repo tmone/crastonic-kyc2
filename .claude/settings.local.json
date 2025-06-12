@@ -59,7 +59,12 @@
       "Bash(./gradlew:*)",
       "Bash(expo run:*)",
       "Bash(EXPO_NO_DYNAMIC_CONFIG=1 npx expo prebuild --platform ios)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(eas whoami:*)",
+      "Bash(eas build:*)",
+      "Bash(eas credentials:*)",
+      "Bash(xed:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
