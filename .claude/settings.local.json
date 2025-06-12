@@ -56,7 +56,8 @@
       "Bash(mkdir:*)",
       "Bash(adb logcat:*)",
       "Bash(~/Library/Android/sdk/platform-tools/adb logcat -d)",
-      "Bash(./gradlew:*)"
+      "Bash(./gradlew:*)",
+      "Bash(expo run:*)"
     ],
     "deny": []
   }
