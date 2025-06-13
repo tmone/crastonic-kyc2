@@ -2,6 +2,8 @@ import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } fro
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as Linking from 'expo-linking';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
@@ -32,6 +34,12 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+
+  useEffect(() => {
+    // Initialize linking for standalone app
+    const prefix = Linking.createURL('/');
+    console.log('Deep link prefix:', prefix);
+  }, []);
 
   if (!loaded) {
     // Async font loading only occurs in development.

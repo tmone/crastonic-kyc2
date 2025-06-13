@@ -64,7 +64,10 @@
       "Bash(eas build:*)",
       "Bash(eas credentials:*)",
       "Bash(xed:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(pkill:*)",
+      "Bash(sudo rm:*)",
+      "Bash(xcrun devicectl device app list:*)"
     ],
     "deny": []
   }
