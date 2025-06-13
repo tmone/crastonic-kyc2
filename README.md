@@ -73,7 +73,13 @@ For details on the ShuftiPro integration, see:
 
 ## Development
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+You can start developing by editing the files inside the **app** directory. 
+
+**Important:** This project uses a custom navigation setup (not expo-router) to avoid deep linking issues in standalone builds. See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for details.
+
+## Troubleshooting
+
+If you encounter app startup issues on real devices, especially with standalone builds, see [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common problems and solutions.
 
 ## Learn more
 
