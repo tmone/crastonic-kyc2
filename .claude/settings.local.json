@@ -56,7 +56,18 @@
       "Bash(mkdir:*)",
       "Bash(adb logcat:*)",
       "Bash(~/Library/Android/sdk/platform-tools/adb logcat -d)",
-      "Bash(./gradlew:*)"
+      "Bash(./gradlew:*)",
+      "Bash(expo run:*)",
+      "Bash(EXPO_NO_DYNAMIC_CONFIG=1 npx expo prebuild --platform ios)",
+      "Bash(mv:*)",
+      "Bash(eas whoami:*)",
+      "Bash(eas build:*)",
+      "Bash(eas credentials:*)",
+      "Bash(xed:*)",
+      "Bash(cp:*)",
+      "Bash(pkill:*)",
+      "Bash(sudo rm:*)",
+      "Bash(xcrun devicectl device app list:*)"
     ],
     "deny": []
   }

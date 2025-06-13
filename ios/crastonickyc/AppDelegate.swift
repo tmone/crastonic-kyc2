@@ -1,7 +1,6 @@
 import Expo
 import React
 import ReactAppDependencyProvider
-import AVFoundation
 
 @UIApplicationMain
 public class AppDelegate: ExpoAppDelegate {
@@ -24,33 +23,6 @@ public class AppDelegate: ExpoAppDelegate {
 
 #if os(iOS) || os(tvOS)
     window = UIWindow(frame: UIScreen.main.bounds)
-
-    // Set exception handler to prevent crashes
-    NSSetUncaughtExceptionHandler { exception in
-        NSLog("CRASH: %@", exception)
-        NSLog("Stack Trace: %@", exception.callStackSymbols)
-    }
-
-    // Pre-warm camera permission
-    AVCaptureDevice.requestAccess(for: .video) { granted in
-        NSLog("Camera permission pre-warmed: \(granted)")
-    }
-
-    // Fix for UIKit view controller presentation issues
-    if #available(iOS 13.0, *) {
-        // Force the app to use traditional presentation style for all view controllers
-        UIViewController.attemptRotationToDeviceOrientation()
-        for windowScene in UIApplication.shared.connectedScenes {
-            if let scene = windowScene as? UIWindowScene {
-                for window in scene.windows {
-                    if let rootVC = window.rootViewController {
-                        rootVC.modalPresentationStyle = .fullScreen
-                    }
-                }
-            }
-        }
-    }
-
     factory.startReactNative(
       withModuleName: "main",
       in: window,
@@ -84,22 +56,13 @@ class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
   // Extension point for config-plugins
 
   override func sourceURL(for bridge: RCTBridge) -> URL? {
-    // Force direct loading of our custom entry point
-    return bundleURL()
+    // needed to return the correct URL for expo-dev-client.
+    bridge.bundleURL ?? bundleURL()
   }
 
   override func bundleURL() -> URL? {
 #if DEBUG
-    // Use CustomApp.js as entry point to bypass Expo client
-    let settings = RCTBundleURLProvider.sharedSettings()
-    let url = settings.jsBundleURL(forBundleRoot: "CustomApp")
-    if let url = url {
-        NSLog("Using custom entry point: %@", url.absoluteString)
-        return url
-    } else {
-        NSLog("Failed to get custom entry point URL, falling back to index")
-        return settings.jsBundleURL(forBundleRoot: "index")
-    }
+    return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
 #else
     return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif

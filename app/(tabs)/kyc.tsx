@@ -477,14 +477,12 @@ export default function KYCScreen() {
         }>
         <ThemedView style={[
           styles.container,
-          colorScheme === 'dark' && { backgroundColor: 'transparent' },
           Platform.OS === 'ios' && { paddingTop: 10 } // iOS-specific padding
         ]}>
           <ThemedText type="title" style={Platform.OS === 'ios' ? styles.iosTitle : {}}>{t('kycTitle')}</ThemedText>
 
           <ThemedView style={[
             styles.contentContainer,
-            colorScheme === 'dark' && { backgroundColor: 'transparent' },
             Platform.OS === 'ios' && styles.iosContentContainer
           ]}>
             <ThemedText style={[styles.description, Platform.OS === 'ios' && styles.iosText]}>
@@ -493,7 +491,6 @@ export default function KYCScreen() {
 
             <ThemedView style={[
               styles.statusContainer,
-              colorScheme === 'dark' && { backgroundColor: 'transparent' },
               Platform.OS === 'ios' && styles.iosStatusContainer
             ]}>
               <ThemedText style={[styles.statusText, Platform.OS === 'ios' && styles.iosText]}>
@@ -523,7 +520,6 @@ export default function KYCScreen() {
 
             <ThemedView style={[
               styles.infoContainer,
-              colorScheme === 'dark' && { backgroundColor: 'transparent' },
               Platform.OS === 'ios' && styles.iosInfoContainer
             ]}>
               <ThemedText style={[styles.infoTitle, Platform.OS === 'ios' && styles.iosTitle]}>
@@ -632,7 +628,6 @@ const styles = StyleSheet.create({
   warningText: {
     fontSize: 14,
     textAlign: 'center',
-    color: '#ff9500',
   },
   // iOS specific styles
   iosContentContainer: {
@@ -642,7 +637,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     padding: 12,
     borderRadius: 8,
-    backgroundColor: 'rgba(170, 170, 170, 0.1)', // Subtle background for iOS
   },
   iosButton: {
     shadowColor: '#000',
@@ -654,7 +648,6 @@ const styles = StyleSheet.create({
   iosInfoContainer: {
     padding: 16,
     borderRadius: 8,
-    backgroundColor: 'rgba(170, 170, 170, 0.1)', // Subtle background for iOS
   },
   iosWarningContainer: {
     borderRadius: 8,

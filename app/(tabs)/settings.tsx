@@ -56,7 +56,7 @@ export default function SettingsScreen() {
         />
       }>
       
-      <ThemedView style={[styles.section, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
+      <ThemedView style={[styles.section, styles.settingCard]}>
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitle}>
             <ThemedText style={styles.sectionIcon}>{actualTheme === 'dark' ? '🌙' : '☀️'}</ThemedText>
@@ -71,7 +71,7 @@ export default function SettingsScreen() {
         </View>
       </ThemedView>
 
-      <ThemedView style={[styles.section, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
+      <ThemedView style={[styles.section, styles.settingCard]}>
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitle}>
             <ThemedText style={styles.sectionIcon}>
@@ -94,9 +94,13 @@ export default function SettingsScreen() {
         </View>
         
         {showLanguageList && (
-          <ThemedView style={[styles.languageDropdown, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
+          <ThemedView style={styles.languageDropdown}>
             <TextInput
-              style={[styles.searchInput, { color: textColor, borderColor: textColor + '30' }]}
+              style={[styles.searchInput, { 
+                color: textColor, 
+                borderColor: colorScheme === 'dark' ? '#444' : '#ddd',
+                backgroundColor: colorScheme === 'dark' ? '#2a2a2a' : '#f8f8f8'
+              }]}
               placeholder={t('searchLanguage')}
               placeholderTextColor={textColor + '60'}
               value={searchQuery}
@@ -114,13 +118,13 @@ export default function SettingsScreen() {
                     setSearchQuery('');
                   }}
                 >
-                  <ThemedView style={[styles.settingRow, colorScheme === 'dark' && { backgroundColor: 'transparent' }]}>
+                  <ThemedView style={styles.settingRow}>
                     <View style={styles.languageInfo}>
                       <ThemedText style={styles.flag}>{lang.flag}</ThemedText>
                       <ThemedText style={styles.languageName}>{lang.name}</ThemedText>
                     </View>
                     {language === lang.code && (
-                      <ThemedText style={styles.checkmark}>✓</ThemedText>
+                      <ThemedText style={[styles.checkmark, { color: colorScheme === 'dark' ? '#81b0ff' : '#007AFF' }]}>✓</ThemedText>
                     )}
                   </ThemedView>
                 </TouchableOpacity>
@@ -143,7 +147,17 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   section: {
-    marginBottom: 16,
+    marginBottom: 20,
+  },
+  settingCard: {
+    padding: 20,
+    borderRadius: 12,
+    marginHorizontal: 0,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -164,6 +178,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 6,
   },
   compactLanguageSelector: {
     flexDirection: 'row',
@@ -178,10 +194,10 @@ const styles = StyleSheet.create({
     maxWidth: 130,
   },
   languageDropdown: {
-    marginTop: 4,
-    paddingTop: 4,
+    marginTop: 16,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#00000010',
+    borderTopColor: 'rgba(128, 128, 128, 0.2)',
   },
   chevron: {
     fontSize: 12,
@@ -192,18 +208,20 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '180deg' }],
   },
   searchInput: {
-    marginBottom: 8,
+    marginBottom: 12,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 10,
     fontSize: 16,
   },
   languageList: {
     maxHeight: 250,
   },
   languageOption: {
-    paddingVertical: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 8,
   },
   languageInfo: {
     flexDirection: 'row',
@@ -218,6 +236,5 @@ const styles = StyleSheet.create({
   },
   checkmark: {
     fontSize: 20,
-    color: '#007AFF',
   },
 });

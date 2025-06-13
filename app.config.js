@@ -8,21 +8,20 @@ module.exports = {
   scheme: "crastonickyc",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
-  
+
   // Force production build mode to disable Expo Go
   jsEngine: "hermes",
   developmentClient: false,
   runtimeVersion: "1.0.0",
-  
-  // Disable expo client
+
+  // Disable expo client and updates for standalone builds
   updates: {
     enabled: false,
-    checkAutomatically: "ON_ERROR_RECOVERY",
   },
-  
+
   ios: {
     supportsTablet: true,
-    bundleIdentifier: "com.crastonic.kyc",
+    bundleIdentifier: "com.thinhcrastonic.crastonic-kyc",
     buildConfiguration: {
       developmentClient: false,
       distribution: "internal"
@@ -31,10 +30,10 @@ module.exports = {
       // Disable Expo client/development menu
       EXDisableDevMenu: true,
       EXNoDevClient: true,
-      
+
       // Allow network access
       NSAllowsArbitraryLoads: true,
-      
+
       // Add required permissions
       NSCameraUsageDescription: "This app needs access to camera for identity verification",
       NSMicrophoneUsageDescription: "This app needs access to microphone for video verification",
@@ -43,7 +42,7 @@ module.exports = {
       NSLocationWhenInUseUsageDescription: "This app needs access to your location for verification purposes",
       NSLocationAlwaysAndWhenInUseUsageDescription: "This app needs access to your location for verification purposes",
       NSLocationAlwaysUsageDescription: "This app needs access to your location in the background for verification purposes",
-      
+
       // Background modes for location
       UIBackgroundModes: ["location", "fetch"],
     }
@@ -83,5 +82,12 @@ module.exports = {
   prebuildCommand: "./scripts/setup-ios.sh",
   experiments: {
     typedRoutes: true
+  },
+  expo:{
+    extra:{
+      eas:{
+        projectId:"dce18393-27da-409e-b2ff-feecacf3ea39"
+      }
+    }
   }
 };
